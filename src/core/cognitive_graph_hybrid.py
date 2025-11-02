@@ -8,10 +8,12 @@ try:  # compatibilidad con ejecuciones desde paquete raíz
     from src.core.autograd_numpy.tensor import Tensor  # type: ignore
     from src.core.trm_act_block import TRM_ACT_Block  # type: ignore
     from src.core.cognitive_block import CognitiveBlock  # type: ignore
+    from src.core.projection_layer import ProjectionLayer  # type: ignore
 except ModuleNotFoundError:  # ejecución con PYTHONPATH=src
     from core.autograd_numpy.tensor import Tensor  # type: ignore
     from core.trm_act_block import TRM_ACT_Block  # type: ignore
     from core.cognitive_block import CognitiveBlock  # type: ignore
+    from core.projection_layer import ProjectionLayer  # type: ignore
 
 try:
     from src.autograd.value import Value  # type: ignore
@@ -25,6 +27,7 @@ class CognitiveGraphHybrid:
     def __init__(self) -> None:
         self.blocks: Dict[str, Any] = {}
         self.connections: Dict[str, List[str]] = {}
+        self.projections: Dict[tuple[str, str], ProjectionLayer] = {}
 
     # ------------------------------------------------------------------
     # Gestión de nodos y conexiones
@@ -40,6 +43,13 @@ class CognitiveGraphHybrid:
             raise KeyError(f"Bloques desconocidos: {src}, {dest}")
         self.connections[dest].append(src)
 
+        src_dim = self._get_output_dim(self.blocks[src])
+        dest_dim = self._get_input_dim(self.blocks[dest])
+
+        if src_dim != dest_dim:
+            self.projections[(src, dest)] = ProjectionLayer(src_dim, dest_dim)
+
+
     # ------------------------------------------------------------------
     # Forward mixto
     # ------------------------------------------------------------------
@@ -54,11 +64,11 @@ class CognitiveGraphHybrid:
             for src in self.connections.get(name, []):
                 if src in outputs:
                     data = outputs[src]
-                    if isinstance(block, CognitiveBlock):
-                        arr = data.data
-                        collected.append(arr)
-                    else:
-                        collected.append(data.data)
+                    out_tensor = data
+                    if (src, name) in self.projections:
+                        proj = self.projections[(src, name)]
+                        out_tensor = proj.forward(out_tensor)
+                    collected.append(out_tensor.data)
 
             # Entradas externas
             if name in inputs:
@@ -116,6 +126,22 @@ class CognitiveGraphHybrid:
     def _infer_input_dim(block: Any) -> int:
         if isinstance(block, TRM_ACT_Block):
             return int(block.W_in.data.shape[0])
-        if isinstance(block, CognitiveBlock):
-            return int(getattr(block.perceiver, "n_inputs", 1))
+        if isinstance(block, CognitiveBlock) or block.__class__.__name__ == "CognitiveBlock":
+            return int(getattr(block, "input_size", getattr(block.perceiver, "n_inputs", 1)))
+        return 1
+
+    @staticmethod
+    def _get_output_dim(block: Any) -> int:
+        if isinstance(block, TRM_ACT_Block):
+            return int(block.W_out.data.shape[1])
+        if isinstance(block, CognitiveBlock) or block.__class__.__name__ == "CognitiveBlock":
+            return int(getattr(block, "output_size", 1))
+        return 1
+
+    @staticmethod
+    def _get_input_dim(block: Any) -> int:
+        if isinstance(block, TRM_ACT_Block):
+            return int(block.W_in.data.shape[0])
+        if isinstance(block, CognitiveBlock) or block.__class__.__name__ == "CognitiveBlock":
+            return int(getattr(block, "input_size", 1))
         return 1

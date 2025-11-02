@@ -25,6 +25,10 @@ class CognitiveBlock:
     """
 
     def __init__(self, n_inputs: int, n_hidden: int = 2, n_outputs: int = 1):
+        self.input_size = n_inputs
+        self.hidden_size = n_hidden
+        self.output_size = n_outputs
+
         self.perceiver = MacroNeuron(n_inputs=n_inputs, n_hidden=n_hidden)
         self.reasoner = ReasoningUnit(n_inputs=1, n_memory=n_hidden, n_out=n_hidden)
         self.decision_weights = [Value(0.1) for _ in range(n_hidden)]

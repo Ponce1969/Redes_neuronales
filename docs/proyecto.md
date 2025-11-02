@@ -36,7 +36,8 @@ neural_core/
 │   │   ├── trm_block.py            # Tiny Recursive Model (Fase 10)
 │   │   ├── trm_act_block.py        # TRM con ACT + deep supervision (Fase 11)
 │   │   ├── cognitive_graph_trm.py  # Grafo TRM adaptativo (Fase 12)
-│   │   └── cognitive_graph_hybrid.py # Grafo híbrido (Fase 13)
+│   │   ├── cognitive_graph_hybrid.py # Grafo híbrido (Fase 13)
+│   │   └── projection_layer.py     # AutoAlign (Fase 14)
 │   ├── engine/
 │   │   ├── __init__.py
 │   │   ├── trainer.py              # Entrenamiento supervisado
@@ -50,7 +51,8 @@ neural_core/
 │   ├── trm_demo.py                 # XOR con TRM vectorizado (Fase 10)
 │   ├── trm_act_demo.py             # TRM con halting adaptativo (Fase 11)
 │   ├── trm_cognitive_graph_demo.py # Grafo TRM recursivo (Fase 12)
-│   └── hybrid_graph_demo.py        # Grafo híbrido TRM + CognitiveBlock (Fase 13)
+│   ├── hybrid_graph_demo.py        # Grafo híbrido TRM + CognitiveBlock (Fase 13)
+│   └── hybrid_graph_autoalign_demo.py # AutoAlign dinámico (Fase 14)
 ├── tests/
 │   ├── test_network.py
 │   ├── test_neuron.py
@@ -142,6 +144,12 @@ neural_core/
 - **Compatibilidad bidireccional**: convierte salidas entre Value ↔ Tensor automáticamente
 - **Demo `examples/hybrid_graph_demo.py`** demostrando razonamiento mixto
 - **Tests `tests/test_cognitive_graph_hybrid.py`** validando reset y estabilidad
+
+### ✅ Fase 14 - AutoAlign Layers
+- **ProjectionLayer** genera proyecciones lineales aprendibles entre bloques con dimensiones distintas
+- **CognitiveGraphHybrid** ahora crea proyecciones on-the-fly al conectar nodos con tamaños incompatibles
+- **Demo `examples/hybrid_graph_autoalign_demo.py`** muestra conexiones sensor → memory → reasoner → decision con AutoAlign
+- **Tests `tests/test_cognitive_graph_hybrid.py`** cubren estabilidad con AutoAlign activado
 
 ## 🧠 Estructura Completa del Proyecto
 
@@ -329,12 +337,12 @@ class NeuralNetwork:
 - **Funciones de activación extensibles**
 - **Tests automatizados**
 
-## 🚀 Próximos Pasos - Fase 14
+## 🚀 Próximos Pasos - Fase 15
 
-### 🧠 Entrenamiento Conjunto Híbrido
-- **Optimización compartida**: combinar gradientes de Value y Tensor
-- **Persistencia** de estados vectorizados y memoria clásica
-- **Interfaz común** para mezclar bloques clásicos, TRM y futuros módulos
+### 🧠 Entrenamiento Conjunto AutoAlign + CognitiveGraph
+- **Optimización compartida**: combinar gradientes de Value y Tensor en presencia de proyecciones
+- **Persistencia** de pesos de ProjectionLayer y estados vectorizados
+- **Interfaz común** para mezclar bloques clásicos, TRM, memoria y nuevas capas
 
 ### 📈 Escalabilidad
 - **Batch processing** con NumPy para TRM y grafo cognitivo
@@ -365,4 +373,4 @@ Este proyecto sirve como:
 
 ---
 
-**Estado actual**: ✅ **Fase 13 Completada** - Grafo cognitivo híbrido operativo
+**Estado actual**: ✅ **Fase 14 Completada** - AutoAlign funcionando en CognitiveGraphHybrid
