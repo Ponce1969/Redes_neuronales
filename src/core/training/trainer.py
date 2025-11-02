@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable, List
+from typing import Any, Dict, Iterable, List
 
 import numpy as np
 
@@ -107,6 +107,18 @@ class GraphTrainer:
             total_loss += float(loss.data)
             contributions += 1
 
+            memory_system = getattr(self.graph, "memory_system", None)
+            if memory_system is not None:
+                outputs_snapshot = {
+                    name: tensor.data.copy() for name, tensor in outputs.items()
+                }
+                memory_system.record_experience(
+                    self._clone_structure(inputs),
+                    self._clone_value(target),
+                    outputs_snapshot,
+                    float(loss.data),
+                )
+
             # Deep supervision: pérdidas locales por bloque
             for name, block in self.graph.blocks.items():
                 output_tensor = outputs[name]
@@ -134,6 +146,23 @@ class GraphTrainer:
         if monitor is not None:
             monitor.track_loss(total_loss)
         return total_loss
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+    def _clone_structure(self, item: Any) -> Any:
+        if isinstance(item, dict):
+            return {k: self._clone_value(v) for k, v in item.items()}
+        return self._clone_value(item)
+
+    def _clone_value(self, value: Any) -> np.ndarray:
+        if isinstance(value, np.ndarray):
+            return value.copy()
+        if isinstance(value, Tensor):
+            return value.data.copy()
+        if isinstance(value, (list, tuple)):
+            return np.array(value, dtype=np.float32)
+        return np.array([value], dtype=np.float32)
 
     # ------------------------------------------------------------------
     # Utilidades

@@ -183,6 +183,20 @@ neural_core/
 - **Demo `examples/cognitive_attention_demo.py`** muestra cómo varía el foco en tiempo real
 - **Tests `tests/test_cognitive_graph_hybrid.py`** verifican almacenamiento y normalización de pesos de atención
 
+### ✅ Fase 17 - Cognitive Monitor System (CMS)
+- **CognitiveMonitor** registra activaciones, pesos de atención y pérdidas en tiempo real
+- **CognitiveLogger** provee logging estructurado en consola/JSON con timestamps
+- **Integración** desde CognitiveGraphHybrid y GraphTrainer para telemetría continua
+- **Demo `examples/cognitive_monitor_demo.py`** ejecuta entrenamiento XOR monitorizado
+- **Datos persistentes** listos para dashboards (Streamlit en Fase 19)
+
+### ✅ Fase 18 - Memory Replay System (MRS)
+- **EpisodicMemory** almacena inputs, targets, outputs, pérdidas y mapas de atención
+- **MemoryReplaySystem** consolida experiencias exitosas mediante sleep cycles
+- **GraphTrainer** registra cada episodio automáticamente durante el entrenamiento
+- **Fase de sueño** con `sleep_and_replay()` que reduce la pérdida promedio
+- **Demo `examples/memory_replay_demo.py`** muestra consolidación tras 300 épocas
+
 ## 🧠 Estructura Completa del Proyecto
 
 ### 🔧 Componentes Implementados:
@@ -369,12 +383,12 @@ class NeuralNetwork:
 - **Funciones de activación extensibles**
 - **Tests automatizados**
 
-## 🚀 Próximos Pasos - Fase 18
+## 🚀 Próximos Pasos - Fase 19
 
-### 🧠 Memory Replay System
-- **Memoria a largo plazo** para consolidar experiencias exitosas
-- **Sampling inteligente** de episodios pasados
-- **Integración** con CognitiveMonitor para etiqueta de sesiones
+### 🧠 Cognitive Dashboard (Streamlit)
+- **Panel interactivo** para visualizar activaciones, atención y pérdidas en tiempo real
+- **Integración** con logs JSON del monitor cognitivo
+- **Comparativa** entre sesiones de entrenamiento y sleep cycles
 
 ### 📈 Escalabilidad
 - **Batch processing** con NumPy para TRM y grafo cognitivo
@@ -405,4 +419,4 @@ Este proyecto sirve como:
 
 ---
 
-**Estado actual**: ✅ **Fase 17 Completada** - Monitor cognitivo operativo con logging
+**Estado actual**: ✅ **Fase 18 Completada** - Memoria episódica y consolidación en producción

@@ -11,6 +11,7 @@ try:  # compatibilidad con ejecuciones desde paquete raíz
     from src.core.projection_layer import ProjectionLayer  # type: ignore
     from src.core.attention.attention_router import AttentionRouter  # type: ignore
     from src.core.monitor.cognitive_monitor import CognitiveMonitor  # type: ignore
+    from src.core.memory.memory_replay import MemoryReplaySystem  # type: ignore
 except ModuleNotFoundError:  # ejecución con PYTHONPATH=src
     from core.autograd_numpy.tensor import Tensor  # type: ignore
     from core.trm_act_block import TRM_ACT_Block  # type: ignore
@@ -18,6 +19,7 @@ except ModuleNotFoundError:  # ejecución con PYTHONPATH=src
     from core.projection_layer import ProjectionLayer  # type: ignore
     from core.attention.attention_router import AttentionRouter  # type: ignore
     from core.monitor.cognitive_monitor import CognitiveMonitor  # type: ignore
+    from core.memory.memory_replay import MemoryReplaySystem  # type: ignore
 
 try:
     from src.autograd.value import Value  # type: ignore
@@ -36,6 +38,7 @@ class CognitiveGraphHybrid:
         self.last_attention: Dict[str, Dict[str, np.ndarray]] = {}
         self.attn_router = AttentionRouter()
         self.monitor = CognitiveMonitor()
+        self.memory_system = MemoryReplaySystem(self, self.monitor)
 
     # ------------------------------------------------------------------
     # Gestión de nodos y conexiones
