@@ -56,17 +56,17 @@ def get_analytical_grads(network: NeuralNetwork, x, y):
     """
     Captura gradientes analíticos calculados por backprop.
     """
-    grads = []
-    
+    layer_gradients_stack: list[list[float]] = []
+
     # Forward pass para obtener activaciones
     outputs = network.forward(x)
-    
+
     # Gradiente de la loss respecto a las salidas
     dL_dy = losses.mse_grad(outputs, y)
-    
-    # Backpropagation manual para obtener gradientes
+
+    # Backpropagation manual para obtener gradientes (de última a primera capa)
     next_deltas: list[float] | None = None
-    
+
     for layer_idx in range(len(network.layers) - 1, -1, -1):
         layer = network.layers[layer_idx]
         layer_deltas = [0.0] * layer.n_neurons
@@ -87,19 +87,25 @@ def get_analytical_grads(network: NeuralNetwork, x, y):
                     sum_w_delta += next_neuron.weights[i] * next_deltas[j]
                 layer_deltas[i] = neuron.activation.derivative(neuron.last_z) * sum_w_delta
 
-        # Calcular gradientes para esta capa
+        # Guardar gradientes de esta capa (coincidiendo con orden de finite_diff_grad)
+        layer_grads: list[float] = []
         for neuron_idx, neuron in enumerate(layer.neurons):
             assert neuron.last_input is not None
             delta = layer_deltas[neuron_idx]
-            
+
             # Gradientes de pesos: dL/dw_i = delta * input_i
             for input_val in neuron.last_input:
-                grads.append(delta * input_val)
-            
-            # Gradiente de bias: dL/db = delta
-            grads.append(delta)
+                layer_grads.append(delta * input_val)
 
+            # Gradiente de bias: dL/db = delta
+            layer_grads.append(delta)
+
+        layer_gradients_stack.insert(0, layer_grads)
         next_deltas = layer_deltas
+
+    grads: list[float] = []
+    for layer_grads in layer_gradients_stack:
+        grads.extend(layer_grads)
 
     return grads
 
@@ -158,7 +164,6 @@ def test_gradients_close():
     assert success_rate >= 0.8, f"Demasiados gradientes diferentes: {success_rate:.2%}"
     
     print(f"   ✅ Test pasado: {success_rate:.1%} de gradientes coinciden")
-    return True
 
 
 if __name__ == "__main__":

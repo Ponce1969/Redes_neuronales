@@ -18,40 +18,36 @@ def test_imports():
         # Test autograd
         from autograd.value import Value
         print("   ✅ autograd.value importado")
-        
+
         from autograd.ops import relu
         print("   ✅ autograd.ops importado")
-        
+
         from autograd.functional import linear, mse_loss
         print("   ✅ autograd.functional importado")
-        
+
         # Test core
         from core.memory_cell import MemoryCell
         print("   ✅ core.memory_cell importado")
-        
+
         from core.macro_neuron import MacroNeuron
         print("   ✅ core.macro_neuron importado")
-        
+
         # Test funcional
         v1 = Value(1.0)
         v2 = Value(2.0)
         result = v1 + v2
         print("   ✅ Operaciones Value funcionando")
-        
+
         memory = MemoryCell(size=2)
         print("   ✅ MemoryCell creada")
-        
+
         macro = MacroNeuron(n_inputs=1, n_hidden=2)
         print("   ✅ MacroNeuron creada")
-        
+
         print("\n🎉 ¡Todos los imports funcionan correctamente!")
-        return True
-        
+
     except Exception as e:
-        print(f"   ❌ Error: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
+        raise AssertionError(f"Error de importación: {e}") from e
 
 if __name__ == "__main__":
     test_imports()

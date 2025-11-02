@@ -5,6 +5,7 @@ Verifica que la red cambia su salida cuando se varía z y que el sistema funcion
 
 import sys
 import os
+import math
 
 # Añadir el directorio src al path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))

@@ -33,6 +33,8 @@ class Trainer:
         self.batch_size = batch_size
         self.shuffle = shuffle
 
+        self.network.configure_optimizer(self.optimizer)
+
     def _make_batches(self, dataset: Iterable[Tuple[List[float], List[float]]]) -> List[Batch]:
         data = list(dataset)
         if self.shuffle:

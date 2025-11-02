@@ -98,3 +98,18 @@ class RMSprop(Optimizer):
             p_new = p - self.lr * g / (math.sqrt(cache) + self.eps)
             new_params.append(p_new)
         return new_params
+
+
+def clone_optimizer(optimizer: Optimizer) -> Optimizer:
+    """Crea una copia fresca del optimizador con los mismos hiperparámetros."""
+
+    if isinstance(optimizer, SGD):
+        return SGD(lr=optimizer.lr)
+    if isinstance(optimizer, SGDMomentum):
+        return SGDMomentum(lr=optimizer.lr, momentum=optimizer.momentum)
+    if isinstance(optimizer, Adam):
+        return Adam(lr=optimizer.lr, beta1=optimizer.beta1, beta2=optimizer.beta2, eps=optimizer.eps)
+    if isinstance(optimizer, RMSprop):
+        return RMSprop(lr=optimizer.lr, rho=optimizer.rho, eps=optimizer.eps)
+
+    raise TypeError(f"No se puede clonar optimizador de tipo {type(optimizer).__name__}")

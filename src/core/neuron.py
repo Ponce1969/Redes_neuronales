@@ -16,7 +16,11 @@ class Neuron:
         self.weights: List[float] = init_weights(n_inputs)
         self.bias: float = 0.0
         self.activation: Activation = ACTIVATIONS[activation]
-        self.optimizer = optimizer or SGD(lr=0.01)
+        if optimizer is not None:
+            self.optimizer = optimizer
+        else:
+            self.optimizer = SGD(lr=0.01)
+        self.optimizer_lr = getattr(self.optimizer, "lr", 0.01)
         self.last_input: List[float] | None = None
         self.last_z: float | None = None
         self.last_output: float | None = None
@@ -46,6 +50,9 @@ class Neuron:
         
         # Actualizar bias (usando descenso simple para mantener compatibilidad)
         self.bias -= learning_rate * dbias
+
+        # mantener lr del optimizador sincronizado por si fue clonado
+        self.optimizer_lr = getattr(self.optimizer, "lr", learning_rate)
 
     def reset(self) -> None:
         self.last_input = None
