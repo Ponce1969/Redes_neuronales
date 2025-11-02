@@ -1,0 +1,37 @@
+[project]
+name = "neural_core"
+version = "0.1.0"
+description = "Motor neuronal modular en Python puro: microneuronas, macroneuronas y aprendizaje desde cero."
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Gonzalo Ponce" }
+]
+license = { text = "MIT" }
+
+# Dependencias básicas
+dependencies = [
+    "python-dotenv>=1.0.1",
+    "loguru>=0.7.2",
+    "numpy>=2.0.0"
+]
+
+# Dependencias de desarrollo (solo para test y tipado)
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "mypy>=1.10.0",
+    "ruff>=0.6.0"
+]
+
+# Configuración de linters / mypy
+[tool.mypy]
+strict = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.ruff]
+select = ["E", "F", "I", "N"]
+line-length = 100
+fix = true
