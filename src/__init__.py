@@ -25,7 +25,8 @@ def _alias_modules(src_package: str, public_name: str, submodules: Iterable[str]
 
 
 _alias_modules("src.autograd", "autograd", ("value", "functional", "ops"))
-_alias_modules("src.core", "core", tuple())
+_alias_modules("src.core.autograd_numpy", "autograd_numpy", ("tensor", "loss"))
+_alias_modules("src.core", "core", ("trm_block", "trm_act_block"))
 _alias_modules("src.engine", "engine", ("trainer", "rl_trainer", "dataset", "predictor"))
 
 __all__ = ["autograd", "core", "engine"]

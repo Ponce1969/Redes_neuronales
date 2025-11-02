@@ -22,13 +22,20 @@ neural_core/
 │   │   ├── value.py                # Nodo autograd
 │   │   ├── functional.py           # linear, mse_loss, etc.
 │   │   └── ops.py                  # Operaciones auxiliares
+│   ├── core/autograd_numpy/
+│   │   ├── __init__.py             # Tensor + pérdidas vectorizadas (Fase 10)
+│   │   ├── tensor.py               # Motor NumPy minimalista
+│   │   └── loss.py                 # MSE / BCE vectorizados
 │   ├── core/
 │   │   ├── __init__.py             # Componentes cognitivos
 │   │   ├── memory_cell.py          # Celda de memoria diferenciable
 │   │   ├── macro_neuron.py         # Macro-neurona con gating
 │   │   ├── reasoning_unit.py       # Unidad de razonamiento
 │   │   ├── cognitive_block.py      # Bloque cognitivo modular
-│   │   └── cognitive_graph.py      # Grafo de bloques cognitivos
+│   │   ├── cognitive_graph.py      # Grafo de bloques cognitivos
+│   │   ├── trm_block.py            # Tiny Recursive Model (Fase 10)
+│   │   ├── trm_act_block.py        # TRM con ACT + deep supervision (Fase 11)
+│   │   └── cognitive_graph_trm.py  # Grafo TRM adaptativo (Fase 12)
 │   ├── engine/
 │   │   ├── __init__.py
 │   │   ├── trainer.py              # Entrenamiento supervisado
@@ -39,7 +46,9 @@ neural_core/
 ├── examples/
 │   ├── cognitive_agent_demo.py     # Bloque cognitivo secuencial
 │   ├── cognitive_graph_demo.py     # Grafo cognitivo (Fase 9)
-│   └── ...                         # Otros ejemplos históricos
+│   ├── trm_demo.py                 # XOR con TRM vectorizado (Fase 10)
+│   ├── trm_act_demo.py             # TRM con halting adaptativo (Fase 11)
+│   └── trm_cognitive_graph_demo.py # Grafo TRM recursivo (Fase 12)
 ├── tests/
 │   ├── test_network.py
 │   ├── test_neuron.py
@@ -107,6 +116,23 @@ neural_core/
 - **Demo `cognitive_graph_demo.py`**: Mente artificial con percepción → razonamiento → decisión
 - **Semilla determinista**: `random.seed(42)` para reproducibilidad
 - **Alias automáticos**: `src/__init__.py` expone `autograd`, `core` y `engine`
+
+### ✅ Fase 10 - Motor Tensor Vectorizado + TRM Base
+- **Tensor** NumPy (`core/autograd_numpy`) como reemplazo de `Value` para operaciones vectorizadas
+- **Funciones de pérdida** MSE/BCE adaptadas al nuevo motor
+- **TRMBlock** recursivo con estado latente z y detach entre pasos
+- **Demo `examples/trm_demo.py`**: TRM aprende XOR con actualización aproximada
+
+### ✅ Fase 11 - Deep Supervision + Adaptive Computation Time
+- **TRM_ACT_Block** con neurona de halting y cálculo adaptativo de pasos
+- **Deep supervision** en cada iteración con pérdidas parciales
+- **Demo `examples/trm_act_demo.py`** validando razonamiento adaptativo en XOR
+
+### ✅ Fase 12 - CognitiveGraph TRM
+- **CognitiveGraphTRM** para orquestar múltiples TRM_ACT conectados
+- **Step numérico** y reset de estados para simulaciones recursivas
+- **Demo `examples/trm_cognitive_graph_demo.py`**: pipeline percepción → razonamiento → decisión
+- **Tests `tests/test_trm_cognitive_graph.py`** asegurando estabilidad y resets
 
 ## 🧠 Estructura Completa del Proyecto
 
@@ -294,19 +320,17 @@ class NeuralNetwork:
 - **Funciones de activación extensibles**
 - **Tests automatizados**
 
-## 🚀 Próximos Pasos - Fase 5
+## 🚀 Próximos Pasos - Fase 13
 
-### 🧠 Espacio Latente y Auto-Curriculum
-- **Variables latentes z** para representación interna
-- **Auto-curriculum learning** con RL
-- **Generación de tareas** dinámica
-- **Mente interna** para planificación
+### 🧠 Integración TRM en CognitiveGraph Completo
+- **Entrenamiento conjunto**: pérdidas combinadas entre CognitiveBlock y TRM_ACT
+- **Persistencia** de estados y pesos vectorizados
+- **Interfaz común** para mezclar bloques clásicos y TRM
 
 ### 📈 Escalabilidad
-- **Batch processing** con numpy
-- **Paralelización** básica
-- **Persistencia** de modelos
-- **Visualización** de entrenamiento
+- **Batch processing** con NumPy para TRM y grafo cognitivo
+- **Estadísticas de halting** y visualización de pasos de razonamiento
+- **Persistencia** de modelos y replay de grafos cognitivos
 
 ## 📋 Requisitos
 
@@ -332,4 +356,4 @@ Este proyecto sirve como:
 
 ---
 
-**Estado actual**: ✅ **Fase 4B Completada** - Sistema validado y listo para Fase 5
+**Estado actual**: ✅ **Fase 12 Completada** - Grafo cognitivo TRM operativo con ACT
