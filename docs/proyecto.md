@@ -37,7 +37,12 @@ neural_core/
 │   │   ├── trm_act_block.py        # TRM con ACT + deep supervision (Fase 11)
 │   │   ├── cognitive_graph_trm.py  # Grafo TRM adaptativo (Fase 12)
 │   │   ├── cognitive_graph_hybrid.py # Grafo híbrido (Fase 13)
-│   │   └── projection_layer.py     # AutoAlign (Fase 14)
+│   │   ├── projection_layer.py     # AutoAlign (Fase 14)
+│   │   └── training/               # Entrenamiento global (Fase 15)
+│   │       ├── __init__.py         # Alias utilitarios de entrenamiento
+│   │       ├── losses.py           # MSE, L1, BCE vectorizados
+│   │       ├── optimizers.py       # SGD / Adam híbridos Value-Tensor
+│   │       └── trainer.py          # GraphTrainer con deep supervision
 │   ├── engine/
 │   │   ├── __init__.py
 │   │   ├── trainer.py              # Entrenamiento supervisado
@@ -52,12 +57,14 @@ neural_core/
 │   ├── trm_act_demo.py             # TRM con halting adaptativo (Fase 11)
 │   ├── trm_cognitive_graph_demo.py # Grafo TRM recursivo (Fase 12)
 │   ├── hybrid_graph_demo.py        # Grafo híbrido TRM + CognitiveBlock (Fase 13)
-│   └── hybrid_graph_autoalign_demo.py # AutoAlign dinámico (Fase 14)
+│   ├── hybrid_graph_autoalign_demo.py # AutoAlign dinámico (Fase 14)
+│   └── global_training_demo.py     # Entrenamiento global con deep supervision (Fase 15)
 ├── tests/
 │   ├── test_network.py
 │   ├── test_neuron.py
 │   ├── test_trainer.py
-│   └── test_cognitive_graph_hybrid.py
+│   ├── test_cognitive_graph_hybrid.py
+│   └── test_graph_trainer.py
 ├── docs/
 │   └── proyecto.md                 # Documentación general
 ├── pyproject.toml                  # Configuración del proyecto
@@ -150,6 +157,13 @@ neural_core/
 - **CognitiveGraphHybrid** ahora crea proyecciones on-the-fly al conectar nodos con tamaños incompatibles
 - **Demo `examples/hybrid_graph_autoalign_demo.py`** muestra conexiones sensor → memory → reasoner → decision con AutoAlign
 - **Tests `tests/test_cognitive_graph_hybrid.py`** cubren estabilidad con AutoAlign activado
+
+### ✅ Fase 15 - Deep Supervision Training Loop
+- **GraphTrainer** entrena CognitiveGraphHybrid completo con supervisión profunda
+- **Módulos `core/training`** centralizan pérdidas, optimizadores y entrenamiento global
+- **Compatibilidad híbrida**: actualiza simultáneamente CognitiveBlock, TRM_ACT_Block y ProjectionLayer
+- **Demo `examples/global_training_demo.py`** aprende XOR extremo a extremo
+- **Tests `tests/test_graph_trainer.py`** validan recolección de parámetros y paso de entrenamiento
 
 ## 🧠 Estructura Completa del Proyecto
 
@@ -337,12 +351,12 @@ class NeuralNetwork:
 - **Funciones de activación extensibles**
 - **Tests automatizados**
 
-## 🚀 Próximos Pasos - Fase 15
+## 🚀 Próximos Pasos - Fase 16
 
-### 🧠 Entrenamiento Conjunto AutoAlign + CognitiveGraph
-- **Optimización compartida**: combinar gradientes de Value y Tensor en presencia de proyecciones
-- **Persistencia** de pesos de ProjectionLayer y estados vectorizados
-- **Interfaz común** para mezclar bloques clásicos, TRM, memoria y nuevas capas
+### 🧠 Curriculum Cognitivo y Evaluación Continua
+- **Entrenamiento escalonado** con datasets sintéticos progresivos
+- **Persistencia** y checkpointing de GraphTrainer / ProjectionLayer
+- **Métricas avanzadas**: halting promedio, regularización de proyecciones
 
 ### 📈 Escalabilidad
 - **Batch processing** con NumPy para TRM y grafo cognitivo
@@ -373,4 +387,4 @@ Este proyecto sirve como:
 
 ---
 
-**Estado actual**: ✅ **Fase 14 Completada** - AutoAlign funcionando en CognitiveGraphHybrid
+**Estado actual**: ✅ **Fase 15 Completada** - Entrenamiento global con deep supervision operativo

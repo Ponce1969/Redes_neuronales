@@ -28,6 +28,7 @@ class CognitiveGraphHybrid:
         self.blocks: Dict[str, Any] = {}
         self.connections: Dict[str, List[str]] = {}
         self.projections: Dict[tuple[str, str], ProjectionLayer] = {}
+        self.last_inputs: Dict[str, Tensor] = {}
 
     # ------------------------------------------------------------------
     # Gestión de nodos y conexiones
@@ -56,6 +57,7 @@ class CognitiveGraphHybrid:
     def forward(self, inputs: Dict[str, List[float]]) -> Dict[str, Tensor]:
         """Ejecuta un paso de razonamiento híbrido."""
         outputs: Dict[str, Tensor] = {}
+        self.last_inputs = {}
 
         for name, block in self.blocks.items():
             collected: List[np.ndarray] = []
@@ -80,10 +82,13 @@ class CognitiveGraphHybrid:
             else:
                 x = np.concatenate(collected, axis=1)
 
+            input_tensor = Tensor(x)
+            self.last_inputs[name] = input_tensor
+
             if isinstance(block, TRM_ACT_Block):
-                tensor_out = block.forward(Tensor(x))
+                tensor_out = block.forward(input_tensor)
             elif isinstance(block, CognitiveBlock) or block.__class__.__name__ == "CognitiveBlock":
-                value_inputs = [Value(float(v)) for v in x.flatten()]
+                value_inputs = [Value(float(v)) for v in input_tensor.data.flatten()]
                 value_outputs = block.forward(value_inputs)
                 arr = np.array([v.data for v in value_outputs], dtype=np.float32).reshape(1, -1)
                 tensor_out = Tensor(arr)

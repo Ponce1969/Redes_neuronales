@@ -27,13 +27,13 @@ def random_uniform(a: float, b: float) -> float:
 class LatentProjector:
     """
     Proyector simple que transforma z (lista) a un vector de dimensión 'out_dim'.
-    Implementado en Python puro.
+    Implementado en Python puro; se puede sustituir luego por una versión vectorizada.
     """
 
-    def __init__(self, z_dim: int, out_dim: int, init_range: float = 0.5):
+    def __init__(self, z_dim: int, out_dim: int, init_range: float = 1.0):
         self.z_dim = z_dim
         self.out_dim = out_dim
-        # pesos: matriz out_dim x z_dim
+        # pesos: matriz out_dim x z_dim (fila por salida)
         self.weights: List[List[float]] = [
             [random_uniform(-init_range, init_range) for _ in range(z_dim)]
             for _ in range(out_dim)
@@ -43,28 +43,21 @@ class LatentProjector:
     def project(self, z: List[float]) -> List[float]:
         """
         Realiza una proyección lineal: out_i = tanh( sum_j w_ij * z_j + b_i )
+        Devuelve vector de longitud out_dim.
         """
-        assert len(z) == self.z_dim, f"z dimension mismatch: expected {self.z_dim}, got {len(z)}"
+        assert len(z) == self.z_dim, "z dimension mismatch"
         out: List[float] = []
         for i in range(self.out_dim):
             s = self.bias[i]
+            row = self.weights[i]
             for j in range(self.z_dim):
-                s += self.weights[i][j] * z[j]
+                s += row[j] * z[j]
+            # activación no-lineal suave para estabilizar (tanh)
             out.append(math.tanh(s))
         return out
 
     def __repr__(self) -> str:
         return f"<LatentProjector z_dim={self.z_dim}, out_dim={self.out_dim}>"
-
-
-def sample_gaussian_z(dim: int, mu: float = 0.0, sigma: float = 1.0) -> List[float]:
-    """Sample z ~ N(mu, sigma^2) (lista de floats)."""
-    return [random.gauss(mu, sigma) for _ in range(dim)]
-
-
-def sample_uniform_z(dim: int, low: float = -1.0, high: float = 1.0) -> List[float]:
-    """Sample z ~ U(low, high)"""
-    return [random.uniform(low, high) for _ in range(dim)]
 
 
 def reparametrize(mu: List[float], logvar: List[float]) -> List[float]:

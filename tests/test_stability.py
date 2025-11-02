@@ -3,6 +3,10 @@ Tests de estabilidad del entrenamiento con XOR
 para verificar convergencia de loss usando distintos optimizadores.
 """
 
+import random
+
+import numpy as np
+
 from core.network import NeuralNetwork
 from core import losses
 from core.optimizers import SGD, Adam, SGDMomentum, RMSprop
@@ -17,10 +21,13 @@ XOR_DATASET = [
 ]
 
 
-def train_and_measure(optimizer, epochs=3000, verbose=False):
+def train_and_measure(optimizer, epochs=3000, verbose=False, seed: int = 42):
     """
     Entrena XOR y mide la pérdida final.
     """
+    random.seed(seed)
+    np.random.seed(seed)
+
     nn = NeuralNetwork([2, 4, 1], activation="sigmoid")
     
     trainer = Trainer(
@@ -113,8 +120,8 @@ def test_stability_comparison():
     ]
     
     results = []
-    for name, optimizer in optimizers:
-        loss, correct = train_and_measure(optimizer, verbose=False)
+    for idx, (name, optimizer) in enumerate(optimizers):
+        loss, correct = train_and_measure(optimizer, verbose=False, seed=42 + idx)
         results.append((name, loss, correct))
         print(f"   {name:<10}: loss={loss:.4f}, accuracy={correct}/4")
     
