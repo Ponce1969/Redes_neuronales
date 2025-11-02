@@ -4,7 +4,11 @@ Pequeño módulo que toma percepciones + memoria y produce inferencias simples.
 
 from __future__ import annotations
 from typing import List
-from src.autograd.value import Value
+
+try:  # compatibilidad con importaciones desde paquete "src"
+    from src.autograd.value import Value  # type: ignore
+except ModuleNotFoundError:  # cuando PYTHONPATH apunta a src/
+    from autograd.value import Value  # type: ignore
 
 
 class ReasoningUnit:

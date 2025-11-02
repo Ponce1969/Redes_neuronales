@@ -4,7 +4,15 @@ El núcleo: combina percepción, memoria y razonamiento en una estructura integr
 
 from __future__ import annotations
 from typing import List
-from src.autograd.value import Value
+
+try:  # compatibilidad cuando se importa como paquete "src"
+    from src.autograd.value import Value  # type: ignore
+    from src.core.macro_neuron import MacroNeuron  # type: ignore
+    from src.core.reasoning_unit import ReasoningUnit  # type: ignore
+except ModuleNotFoundError:  # cuando PYTHONPATH apunta a src/
+    from autograd.value import Value  # type: ignore
+    from core.macro_neuron import MacroNeuron  # type: ignore
+    from core.reasoning_unit import ReasoningUnit  # type: ignore
 
 
 class CognitiveBlock:
@@ -17,9 +25,6 @@ class CognitiveBlock:
     """
 
     def __init__(self, n_inputs: int, n_hidden: int = 2, n_outputs: int = 1):
-        from src.core.macro_neuron import MacroNeuron
-        from src.core.reasoning_unit import ReasoningUnit
-        
         self.perceiver = MacroNeuron(n_inputs=n_inputs, n_hidden=n_hidden)
         self.reasoner = ReasoningUnit(n_inputs=1, n_memory=n_hidden, n_out=n_hidden)
         self.decision_weights = [Value(0.1) for _ in range(n_hidden)]

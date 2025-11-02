@@ -6,8 +6,13 @@ Combina micro-neuronas con memoria y gating para razonamiento secuencial.
 from __future__ import annotations
 from typing import List
 import random
-from src.autograd.value import Value
-from src.core.memory_cell import MemoryCell
+
+try:  # compatibilidad con importaciones desde paquete "src"
+    from src.autograd.value import Value  # type: ignore
+    from src.core.memory_cell import MemoryCell  # type: ignore
+except ModuleNotFoundError:  # cuando PYTHONPATH apunta a src/
+    from autograd.value import Value  # type: ignore
+    from core.memory_cell import MemoryCell  # type: ignore
 
 
 class MacroNeuron:

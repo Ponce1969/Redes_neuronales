@@ -35,7 +35,8 @@ neural_core/
 │   │   ├── cognitive_graph.py      # Grafo de bloques cognitivos
 │   │   ├── trm_block.py            # Tiny Recursive Model (Fase 10)
 │   │   ├── trm_act_block.py        # TRM con ACT + deep supervision (Fase 11)
-│   │   └── cognitive_graph_trm.py  # Grafo TRM adaptativo (Fase 12)
+│   │   ├── cognitive_graph_trm.py  # Grafo TRM adaptativo (Fase 12)
+│   │   └── cognitive_graph_hybrid.py # Grafo híbrido (Fase 13)
 │   ├── engine/
 │   │   ├── __init__.py
 │   │   ├── trainer.py              # Entrenamiento supervisado
@@ -48,11 +49,13 @@ neural_core/
 │   ├── cognitive_graph_demo.py     # Grafo cognitivo (Fase 9)
 │   ├── trm_demo.py                 # XOR con TRM vectorizado (Fase 10)
 │   ├── trm_act_demo.py             # TRM con halting adaptativo (Fase 11)
-│   └── trm_cognitive_graph_demo.py # Grafo TRM recursivo (Fase 12)
+│   ├── trm_cognitive_graph_demo.py # Grafo TRM recursivo (Fase 12)
+│   └── hybrid_graph_demo.py        # Grafo híbrido TRM + CognitiveBlock (Fase 13)
 ├── tests/
 │   ├── test_network.py
 │   ├── test_neuron.py
-│   └── test_trainer.py
+│   ├── test_trainer.py
+│   └── test_cognitive_graph_hybrid.py
 ├── docs/
 │   └── proyecto.md                 # Documentación general
 ├── pyproject.toml                  # Configuración del proyecto
@@ -133,6 +136,12 @@ neural_core/
 - **Step numérico** y reset de estados para simulaciones recursivas
 - **Demo `examples/trm_cognitive_graph_demo.py`**: pipeline percepción → razonamiento → decisión
 - **Tests `tests/test_trm_cognitive_graph.py`** asegurando estabilidad y resets
+
+### ✅ Fase 13 - CognitiveGraph Hybrid
+- **CognitiveGraphHybrid** integra CognitiveBlock clásicos y TRM_ACT adaptativos
+- **Compatibilidad bidireccional**: convierte salidas entre Value ↔ Tensor automáticamente
+- **Demo `examples/hybrid_graph_demo.py`** demostrando razonamiento mixto
+- **Tests `tests/test_cognitive_graph_hybrid.py`** validando reset y estabilidad
 
 ## 🧠 Estructura Completa del Proyecto
 
@@ -320,12 +329,12 @@ class NeuralNetwork:
 - **Funciones de activación extensibles**
 - **Tests automatizados**
 
-## 🚀 Próximos Pasos - Fase 13
+## 🚀 Próximos Pasos - Fase 14
 
-### 🧠 Integración TRM en CognitiveGraph Completo
-- **Entrenamiento conjunto**: pérdidas combinadas entre CognitiveBlock y TRM_ACT
-- **Persistencia** de estados y pesos vectorizados
-- **Interfaz común** para mezclar bloques clásicos y TRM
+### 🧠 Entrenamiento Conjunto Híbrido
+- **Optimización compartida**: combinar gradientes de Value y Tensor
+- **Persistencia** de estados vectorizados y memoria clásica
+- **Interfaz común** para mezclar bloques clásicos, TRM y futuros módulos
 
 ### 📈 Escalabilidad
 - **Batch processing** con NumPy para TRM y grafo cognitivo
@@ -356,4 +365,4 @@ Este proyecto sirve como:
 
 ---
 
-**Estado actual**: ✅ **Fase 12 Completada** - Grafo cognitivo TRM operativo con ACT
+**Estado actual**: ✅ **Fase 13 Completada** - Grafo cognitivo híbrido operativo
