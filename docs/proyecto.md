@@ -16,30 +16,38 @@
 ```
 neural_core/
 ├── src/
-│   ├── core/                    # Núcleo neuronal
-│   │   ├── neuron.py           # Microneuronas individuales
-│   │   ├── layer.py            # Capas de neuronas
-│   │   ├── network.py          # Red neuronal completa
-│   │   ├── activations.py      # Funciones de activación
-│   │   ├── losses.py           # Funciones de pérdida
-│   │   ├── optimizers.py       # Optimizadores modulares
-│   │   └── latent.py           # Espacio latente (Fase 5)
-│   ├── engine/                 # Motor de entrenamiento
-│   │   ├── trainer.py          # Entrenamiento supervisado
-│   │   └── rl_trainer.py       # Entrenamiento RL (Fase 5)
-│   └── app.py                  # Punto de entrada
-├── tests/                      # Tests de validación
-│   ├── test_gradients.py       # Test de gradientes
-│   ├── test_stability.py       # Test de estabilidad
-│   └── test_validation.py      # Validación básica
-├── examples/                   # Ejemplos prácticos
-│   ├── train_xor.py            # XOR con diferentes optimizadores
-│   ├── compare_optimizers.py   # Comparación de optimizadores
-│   └── train_rl_curriculum.py  # Auto-curriculum (Fase 5)
-├── docs/                       # Documentación
-│   └── proyecto.md             # Este archivo
-├── pyproject.toml              # Configuración del proyecto
-└── run_tests.py               # Script de tests
+│   ├── __init__.py                 # Alias automáticos (autograd/core/engine)
+│   ├── autograd/
+│   │   ├── __init__.py             # Reexporta Value
+│   │   ├── value.py                # Nodo autograd
+│   │   ├── functional.py           # linear, mse_loss, etc.
+│   │   └── ops.py                  # Operaciones auxiliares
+│   ├── core/
+│   │   ├── __init__.py             # Componentes cognitivos
+│   │   ├── memory_cell.py          # Celda de memoria diferenciable
+│   │   ├── macro_neuron.py         # Macro-neurona con gating
+│   │   ├── reasoning_unit.py       # Unidad de razonamiento
+│   │   ├── cognitive_block.py      # Bloque cognitivo modular
+│   │   └── cognitive_graph.py      # Grafo de bloques cognitivos
+│   ├── engine/
+│   │   ├── __init__.py
+│   │   ├── trainer.py              # Entrenamiento supervisado
+│   │   ├── rl_trainer.py           # Entrenamiento RL
+│   │   ├── dataset.py              # Utilidades de datasets
+│   │   └── predictor.py            # Predictores utilitarios
+│   └── app.py                      # Punto de entrada CLI
+├── examples/
+│   ├── cognitive_agent_demo.py     # Bloque cognitivo secuencial
+│   ├── cognitive_graph_demo.py     # Grafo cognitivo (Fase 9)
+│   └── ...                         # Otros ejemplos históricos
+├── tests/
+│   ├── test_network.py
+│   ├── test_neuron.py
+│   └── test_trainer.py
+├── docs/
+│   └── proyecto.md                 # Documentación general
+├── pyproject.toml                  # Configuración del proyecto
+└── README.md
 ```
 
 ## 🧩 Fases Completadas
@@ -85,19 +93,22 @@ neural_core/
 - **Sistema cognitivo** con contexto temporal
 - **Demo de memoria** funcionando con autograd
 
-## 🧠 Fase 7 - Macro-Neuronas Cognitivas (Sistema Razonador)
+### ✅ Fase 8 - CognitiveBlock (Arquitectura Cognitiva Modular)
+- **ReasoningUnit**: Unidad que combina percepción y memoria para inferencias
+- **CognitiveBlock**: Bloque cognitivo completo con percepción, memoria y razonamiento
+- **Arquitectura modular**: Componentes interconectables para construir mentes artificiales
+- **Demo de predicción secuencial**: Aprende patrones temporales sin supervisión
+- **Integración completa**: Todos los componentes usan el motor autograd
 
-### 📁 Nueva Estructura:
-```
-src/
-├── autograd/           # Motor diferenciable (Fase 6)
-├── autograd/
-│   ├── value.py          # Nodo escalar con autograd
-│   ├── ops.py            # Funciones matemáticas
-│   └── functional.py     # API estilo PyTorch
-├── core/
-│   └── adapters.py       # Enlace con red existente (futuro)
-```
+### ✅ Fase 9 - CognitiveGraph (Mente Modular Emergente)
+- **CognitiveGraph**: Red de CognitiveBlock interconectados
+- **Comunicación interbloques**: Feedforward, recurrente y reflexivo
+- **Memoria compartida**: Estado global accesible por todos los bloques
+- **Demo `cognitive_graph_demo.py`**: Mente artificial con percepción → razonamiento → decisión
+- **Semilla determinista**: `random.seed(42)` para reproducibilidad
+- **Alias automáticos**: `src/__init__.py` expone `autograd`, `core` y `engine`
+
+## 🧠 Estructura Completa del Proyecto
 
 ### 🔧 Componentes Implementados:
 
@@ -149,9 +160,10 @@ loss.backward()  # ¡Sin backprop manual!
 | Autograd| Automática| Baja        | Alta         |
 
 ### 🚀 Próximos Pasos:
-- **Fase 7**: Macro-neuronas cognitivas
-- **Fase 8**: Memoria y atención
+- **Fase 10**: Sistemas cognitivos multi-agente
 - **Vectorización**: Optimización con NumPy (opcional)
+- **Persistencia**: Guardado/carga de pesos
+- **Exportar más alias**: Evaluar exposición plana de `io`, `examples`
 
 ## 🚀 Uso Rápido
 

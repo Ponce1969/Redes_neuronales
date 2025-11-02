@@ -4,7 +4,7 @@ Funciones de conveniencia sobre Value.
 """
 
 from __future__ import annotations
-from autograd.value import Value
+from .value import Value
 import math
 
 

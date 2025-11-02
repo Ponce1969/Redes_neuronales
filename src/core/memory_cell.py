@@ -5,7 +5,10 @@ Mantiene estado interno con decaimiento y actualización suave.
 
 from __future__ import annotations
 from typing import List
-from autograd.value import Value
+try:  # Soporta ejecuciones tanto como paquete "src" como paquete raíz
+    from src.autograd.value import Value
+except ModuleNotFoundError:  # Cuando PYTHONPATH apunta directamente a src/
+    from autograd.value import Value
 
 
 class MemoryCell:

@@ -1,23 +1,19 @@
 """
-Macro-neurona cognitiva para Fase 7.
+Macro-neurona cognitiva para Fase 7 y 8.
 Combina micro-neuronas con memoria y gating para razonamiento secuencial.
 """
 
 from __future__ import annotations
 from typing import List
 import random
-from autograd.value import Value
-from autograd.functional import linear
-# Usar tanh directo desde Value
-from core.memory_cell import MemoryCell
+from src.autograd.value import Value
+from src.core.memory_cell import MemoryCell
 
 
 class MacroNeuron:
     """
-    Macro-neurona que integra:
-    - Micro-neuronas internas
-    - Memoria persistente
-    - Gating para control de información
+    Macro-neurona cognitiva corregida para Fase 7-9.
+    Combina micro-neuronas con memoria y gating para razonamiento secuencial.
     """
     
     def __init__(self, n_inputs: int, n_hidden: int = 3, decay: float = 0.9):
@@ -48,26 +44,32 @@ class MacroNeuron:
         h_prev = self.memory.output()
         
         # 1. Cálculo de gate (cuánto recordar vs actualizar)
-        gate_sum = sum(w * x for w, x in zip(self.gate_weights, inputs)) + self.gate_bias
+        gate_sum = Value(0.0)
+        for w, x in zip(self.gate_weights, inputs):
+            gate_sum = gate_sum + w * x
+        gate_sum = gate_sum + self.gate_bias
         gate = gate_sum.tanh()
         
-        # 2. Candidato a nueva memoria
-        combined = inputs + h_prev
-        weights = self.input_weights + self.memory_weights
-        
-        # Calcular candidato para cada dimensión
+        # 2. Candidato a nueva memoria para cada dimensión
         h_new = []
         one = Value(1.0)
         
-        # Para cada dimensión de la memoria
-        for h in h_prev:
-            # Calcular input para esta dimensión
-            input_sum = sum(w * x for w, x in zip(self.input_weights, inputs))
-            memory_sum = sum(w * h_prev[j] for j, w in enumerate(self.memory_weights))
+        for i in range(len(h_prev)):
+            # Input para esta dimensión
+            input_sum = Value(0.0)
+            for w, x in zip(self.input_weights, inputs):
+                input_sum = input_sum + w * x
+            
+            # Memoria para esta dimensión - CORREGIDO
+            memory_sum = Value(0.0)
+            for j, w in enumerate(self.memory_weights):
+                memory_sum = memory_sum + w * h_prev[j]
+            
             candidate = (input_sum + memory_sum + self.bias).tanh()
             
             # Mezcla con gate
-            h_new.append(h * gate + candidate * (one - gate))
+            h_new_val = h_prev[i] * gate + candidate * (one - gate)
+            h_new.append(h_new_val)
         
         # 3. Actualizar memoria y retornar
         self.memory.update(h_new)

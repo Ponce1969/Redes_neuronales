@@ -5,7 +5,7 @@ Operaciones de red completas usando Value.
 
 from __future__ import annotations
 from typing import List
-from autograd.value import Value
+from .value import Value
 
 
 def linear(inputs: List[Value], weights: List[Value], bias: Value) -> Value:
