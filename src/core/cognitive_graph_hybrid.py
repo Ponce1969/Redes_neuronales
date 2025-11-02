@@ -9,11 +9,13 @@ try:  # compatibilidad con ejecuciones desde paquete raíz
     from src.core.trm_act_block import TRM_ACT_Block  # type: ignore
     from src.core.cognitive_block import CognitiveBlock  # type: ignore
     from src.core.projection_layer import ProjectionLayer  # type: ignore
+    from src.core.attention.attention_router import AttentionRouter  # type: ignore
 except ModuleNotFoundError:  # ejecución con PYTHONPATH=src
     from core.autograd_numpy.tensor import Tensor  # type: ignore
     from core.trm_act_block import TRM_ACT_Block  # type: ignore
     from core.cognitive_block import CognitiveBlock  # type: ignore
     from core.projection_layer import ProjectionLayer  # type: ignore
+    from core.attention.attention_router import AttentionRouter  # type: ignore
 
 try:
     from src.autograd.value import Value  # type: ignore
@@ -29,6 +31,8 @@ class CognitiveGraphHybrid:
         self.connections: Dict[str, List[str]] = {}
         self.projections: Dict[tuple[str, str], ProjectionLayer] = {}
         self.last_inputs: Dict[str, Tensor] = {}
+        self.last_attention: Dict[str, Dict[str, np.ndarray]] = {}
+        self.attn_router = AttentionRouter()
 
     # ------------------------------------------------------------------
     # Gestión de nodos y conexiones
@@ -50,6 +54,8 @@ class CognitiveGraphHybrid:
         if src_dim != dest_dim:
             self.projections[(src, dest)] = ProjectionLayer(src_dim, dest_dim)
 
+        self.attn_router.register(src, dest, src_dim, dest_dim)
+
 
     # ------------------------------------------------------------------
     # Forward mixto
@@ -58,6 +64,7 @@ class CognitiveGraphHybrid:
         """Ejecuta un paso de razonamiento híbrido."""
         outputs: Dict[str, Tensor] = {}
         self.last_inputs = {}
+        self.last_attention = {}
 
         for name, block in self.blocks.items():
             collected: List[np.ndarray] = []
@@ -80,7 +87,20 @@ class CognitiveGraphHybrid:
                 in_dim = self._infer_input_dim(block)
                 x = np.zeros((1, in_dim), dtype=np.float32)
             else:
-                x = np.concatenate(collected, axis=1)
+                x = np.mean(np.stack(collected), axis=0)
+
+            attn_sources = {}
+            for src in self.connections.get(name, []):
+                if src in outputs:
+                    tensor_data = outputs[src].data
+                    if (src, name) in self.projections:
+                        tensor_data = self.projections[(src, name)].forward(outputs[src]).data
+                    attn_sources[src] = tensor_data
+
+            x_attn, attn_weights = self.attn_router.route(name, x, attn_sources)
+            if attn_weights:
+                self.last_attention[name] = attn_weights
+                x = (x + x_attn) / 2.0
 
             input_tensor = Tensor(x)
             self.last_inputs[name] = input_tensor

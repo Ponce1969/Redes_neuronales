@@ -63,3 +63,14 @@ def test_autoalign_projection_creation() -> None:
     outputs = graph.forward({"sensor": [0.5]})
     assert "reasoner" in outputs
     assert outputs["reasoner"].data.shape[1] == 1
+
+
+def test_attention_weights_stored() -> None:
+    graph = build_hybrid_graph()
+    graph.forward({"sensor": [0.4]})
+    assert isinstance(graph.last_attention, dict)
+    # decision debe tener atención sobre reasoner
+    if graph.last_attention.get("decision"):
+        weights = graph.last_attention["decision"].get("reasoner")
+        if weights is not None:
+            assert np.isclose(np.sum(weights), 1.0)

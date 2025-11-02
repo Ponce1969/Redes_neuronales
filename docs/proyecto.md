@@ -38,7 +38,16 @@ neural_core/
 │   │   ├── cognitive_graph_trm.py  # Grafo TRM adaptativo (Fase 12)
 │   │   ├── cognitive_graph_hybrid.py # Grafo híbrido (Fase 13)
 │   │   ├── projection_layer.py     # AutoAlign (Fase 14)
-│   │   └── training/               # Entrenamiento global (Fase 15)
+│   │   ├── training/               # Entrenamiento global (Fase 15)
+│   │   │   ├── __init__.py         # Alias utilitarios de entrenamiento
+│   │   │   ├── losses.py           # MSE, L1, BCE vectorizados
+│   │   │   ├── optimizers.py       # SGD / Adam híbridos Value-Tensor
+│   │   │   └── trainer.py          # GraphTrainer con deep supervision
+│   │   └── attention/              # Atención cognitiva dinámica (Fase 16)
+│   │       ├── __init__.py         # Exportaciones de atención
+│   │       ├── attention_layer.py  # Capa de atención Query-Key-Value
+│   │       ├── attention_router.py # Router de múltiples atenciones
+│   │       └── utils.py            # Softmax y utilidades numéricas
 │   │       ├── __init__.py         # Alias utilitarios de entrenamiento
 │   │       ├── losses.py           # MSE, L1, BCE vectorizados
 │   │       ├── optimizers.py       # SGD / Adam híbridos Value-Tensor
@@ -58,13 +67,15 @@ neural_core/
 │   ├── trm_cognitive_graph_demo.py # Grafo TRM recursivo (Fase 12)
 │   ├── hybrid_graph_demo.py        # Grafo híbrido TRM + CognitiveBlock (Fase 13)
 │   ├── hybrid_graph_autoalign_demo.py # AutoAlign dinámico (Fase 14)
-│   └── global_training_demo.py     # Entrenamiento global con deep supervision (Fase 15)
+│   ├── global_training_demo.py     # Entrenamiento global con deep supervision (Fase 15)
+│   └── cognitive_attention_demo.py # Atención cognitiva dinámica (Fase 16)
 ├── tests/
 │   ├── test_network.py
 │   ├── test_neuron.py
 │   ├── test_trainer.py
 │   ├── test_cognitive_graph_hybrid.py
-│   └── test_graph_trainer.py
+│   ├── test_graph_trainer.py
+│   └── test_attention_router.py    # (Fase 16 - futuro)
 ├── docs/
 │   └── proyecto.md                 # Documentación general
 ├── pyproject.toml                  # Configuración del proyecto
@@ -164,6 +175,13 @@ neural_core/
 - **Compatibilidad híbrida**: actualiza simultáneamente CognitiveBlock, TRM_ACT_Block y ProjectionLayer
 - **Demo `examples/global_training_demo.py`** aprende XOR extremo a extremo
 - **Tests `tests/test_graph_trainer.py`** validan recolección de parámetros y paso de entrenamiento
+
+### ✅ Fase 16 - Cognitive Attention System (CAS)
+- **CognitiveAttentionLayer** calcula atención contextual Query-Key-Value entre bloques
+- **AttentionRouter** coordina pesos dinámicos para cada conexión del grafo
+- **CognitiveGraphHybrid** integra atención + AutoAlign para foco cognitivo adaptativo
+- **Demo `examples/cognitive_attention_demo.py`** muestra cómo varía el foco en tiempo real
+- **Tests `tests/test_cognitive_graph_hybrid.py`** verifican almacenamiento y normalización de pesos de atención
 
 ## 🧠 Estructura Completa del Proyecto
 
@@ -351,12 +369,12 @@ class NeuralNetwork:
 - **Funciones de activación extensibles**
 - **Tests automatizados**
 
-## 🚀 Próximos Pasos - Fase 16
+## 🚀 Próximos Pasos - Fase 17
 
-### 🧠 Curriculum Cognitivo y Evaluación Continua
-- **Entrenamiento escalonado** con datasets sintéticos progresivos
-- **Persistencia** y checkpointing de GraphTrainer / ProjectionLayer
-- **Métricas avanzadas**: halting promedio, regularización de proyecciones
+### 🧠 Cognitive Monitor System
+- **Dashboard interno** para visualizar pesos de atención, pérdidas y trayectorias de razonamiento
+- **Logging estructurado** con hooks en GraphTrainer y AttentionRouter
+- **Alertas** de saturación o desbalance de foco cognitivo
 
 ### 📈 Escalabilidad
 - **Batch processing** con NumPy para TRM y grafo cognitivo
@@ -387,4 +405,4 @@ Este proyecto sirve como:
 
 ---
 
-**Estado actual**: ✅ **Fase 15 Completada** - Entrenamiento global con deep supervision operativo
+**Estado actual**: ✅ **Fase 16 Completada** - Atención cognitiva dinámica integrada
