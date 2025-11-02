@@ -43,15 +43,15 @@ neural_core/
 │   │   │   ├── losses.py           # MSE, L1, BCE vectorizados
 │   │   │   ├── optimizers.py       # SGD / Adam híbridos Value-Tensor
 │   │   │   └── trainer.py          # GraphTrainer con deep supervision
-│   │   └── attention/              # Atención cognitiva dinámica (Fase 16)
-│   │       ├── __init__.py         # Exportaciones de atención
-│   │       ├── attention_layer.py  # Capa de atención Query-Key-Value
-│   │       ├── attention_router.py # Router de múltiples atenciones
-│   │       └── utils.py            # Softmax y utilidades numéricas
-│   │       ├── __init__.py         # Alias utilitarios de entrenamiento
-│   │       ├── losses.py           # MSE, L1, BCE vectorizados
-│   │       ├── optimizers.py       # SGD / Adam híbridos Value-Tensor
-│   │       └── trainer.py          # GraphTrainer con deep supervision
+│   │   ├── attention/              # Atención cognitiva dinámica (Fase 16)
+│   │   │   ├── __init__.py         # Exportaciones de atención
+│   │   │   ├── attention_layer.py  # Capa de atención Query-Key-Value
+│   │   │   ├── attention_router.py # Router de múltiples atenciones
+│   │   │   └── utils.py            # Softmax y utilidades numéricas
+│   │   └── monitor/                # Cognitive Monitor System (Fase 17)
+│   │       ├── __init__.py         # Exportaciones de monitoreo
+│   │       ├── cognitive_monitor.py# Seguimiento de activaciones/atención
+│   │       └── logger.py           # Logger JSON/timestamps
 │   ├── engine/
 │   │   ├── __init__.py
 │   │   ├── trainer.py              # Entrenamiento supervisado
@@ -75,7 +75,7 @@ neural_core/
 │   ├── test_trainer.py
 │   ├── test_cognitive_graph_hybrid.py
 │   ├── test_graph_trainer.py
-│   └── test_attention_router.py    # (Fase 16 - futuro)
+│   └── test_attention_router.py    # (Fase 16-17 - futuro)
 ├── docs/
 │   └── proyecto.md                 # Documentación general
 ├── pyproject.toml                  # Configuración del proyecto
@@ -369,12 +369,12 @@ class NeuralNetwork:
 - **Funciones de activación extensibles**
 - **Tests automatizados**
 
-## 🚀 Próximos Pasos - Fase 17
+## 🚀 Próximos Pasos - Fase 18
 
-### 🧠 Cognitive Monitor System
-- **Dashboard interno** para visualizar pesos de atención, pérdidas y trayectorias de razonamiento
-- **Logging estructurado** con hooks en GraphTrainer y AttentionRouter
-- **Alertas** de saturación o desbalance de foco cognitivo
+### 🧠 Memory Replay System
+- **Memoria a largo plazo** para consolidar experiencias exitosas
+- **Sampling inteligente** de episodios pasados
+- **Integración** con CognitiveMonitor para etiqueta de sesiones
 
 ### 📈 Escalabilidad
 - **Batch processing** con NumPy para TRM y grafo cognitivo
@@ -405,4 +405,4 @@ Este proyecto sirve como:
 
 ---
 
-**Estado actual**: ✅ **Fase 16 Completada** - Atención cognitiva dinámica integrada
+**Estado actual**: ✅ **Fase 17 Completada** - Monitor cognitivo operativo con logging

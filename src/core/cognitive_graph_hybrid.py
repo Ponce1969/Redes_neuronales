@@ -10,12 +10,14 @@ try:  # compatibilidad con ejecuciones desde paquete raíz
     from src.core.cognitive_block import CognitiveBlock  # type: ignore
     from src.core.projection_layer import ProjectionLayer  # type: ignore
     from src.core.attention.attention_router import AttentionRouter  # type: ignore
+    from src.core.monitor.cognitive_monitor import CognitiveMonitor  # type: ignore
 except ModuleNotFoundError:  # ejecución con PYTHONPATH=src
     from core.autograd_numpy.tensor import Tensor  # type: ignore
     from core.trm_act_block import TRM_ACT_Block  # type: ignore
     from core.cognitive_block import CognitiveBlock  # type: ignore
     from core.projection_layer import ProjectionLayer  # type: ignore
     from core.attention.attention_router import AttentionRouter  # type: ignore
+    from core.monitor.cognitive_monitor import CognitiveMonitor  # type: ignore
 
 try:
     from src.autograd.value import Value  # type: ignore
@@ -33,6 +35,7 @@ class CognitiveGraphHybrid:
         self.last_inputs: Dict[str, Tensor] = {}
         self.last_attention: Dict[str, Dict[str, np.ndarray]] = {}
         self.attn_router = AttentionRouter()
+        self.monitor = CognitiveMonitor()
 
     # ------------------------------------------------------------------
     # Gestión de nodos y conexiones
@@ -101,6 +104,8 @@ class CognitiveGraphHybrid:
             if attn_weights:
                 self.last_attention[name] = attn_weights
                 x = (x + x_attn) / 2.0
+                for src, weights in attn_weights.items():
+                    self.monitor.track_attention(src, name, np.array(weights))
 
             input_tensor = Tensor(x)
             self.last_inputs[name] = input_tensor
@@ -116,6 +121,7 @@ class CognitiveGraphHybrid:
                 raise TypeError(f"Tipo de bloque no soportado: {type(block)}")
 
             outputs[name] = tensor_out
+            self.monitor.track_activations(name, tensor_out.data)
 
         return outputs
 

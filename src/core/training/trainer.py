@@ -130,6 +130,9 @@ class GraphTrainer:
         total_loss /= max(1, contributions)
         grads = [g / max(1, len(batch_inputs)) for g in grads]
         self.optimizer.step(grads)
+        monitor = getattr(self.graph, "monitor", None)
+        if monitor is not None:
+            monitor.track_loss(total_loss)
         return total_loss
 
     # ------------------------------------------------------------------
