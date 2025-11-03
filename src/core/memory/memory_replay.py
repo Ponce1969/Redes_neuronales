@@ -16,6 +16,11 @@ if TYPE_CHECKING:  # pragma: no cover
     except ModuleNotFoundError:  # pragma: no cover
         from core.memory.consolidation import MemoryConsolidation  # type: ignore
 
+try:
+    from src.core.monitor.global_state import record_memory_state  # type: ignore
+except ModuleNotFoundError:
+    from core.monitor.global_state import record_memory_state  # type: ignore
+
 
 class MemoryReplaySystem:
     """Sistema central de memoria episódica y consolidación."""
@@ -49,6 +54,7 @@ class MemoryReplaySystem:
             float(loss),
             attention_snapshot,
         )
+        self._sync_memory_state()
 
     def sleep_and_replay(self) -> float:
         """Inicia una fase de consolidación con las mejores experiencias."""
@@ -61,6 +67,21 @@ class MemoryReplaySystem:
             )
         return avg_loss
 
+    def _sync_memory_state(self) -> None:
+        if not hasattr(self.memory, "buffer"):
+            return
+        serialized = []
+        for episode in list(self.memory.buffer)[-20:]:
+            serialized.append(
+                {
+                    "input": _to_serializable(episode.get("input")),
+                    "target": _to_serializable(episode.get("target")),
+                    "loss": float(episode.get("loss", 0.0)),
+                    "attention": _to_serializable(episode.get("attention", {})),
+                }
+            )
+        record_memory_state(serialized)
+
     def _build_consolidation(self, graph: Any):
         if TYPE_CHECKING:  # pragma: no cover
             consolidation_cls = MemoryConsolidation  # type: ignore[name-defined]
@@ -70,3 +91,13 @@ class MemoryReplaySystem:
             except ModuleNotFoundError:
                 from core.memory.consolidation import MemoryConsolidation as consolidation_cls  # type: ignore
         return consolidation_cls(graph, self.memory)
+
+
+def _to_serializable(value: Any) -> Any:
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, dict):
+        return {k: _to_serializable(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_to_serializable(v) for v in value]
+    return value

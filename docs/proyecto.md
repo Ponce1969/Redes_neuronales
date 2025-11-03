@@ -51,7 +51,8 @@ neural_core/
 │   │   └── monitor/                # Cognitive Monitor System (Fase 17)
 │   │       ├── __init__.py         # Exportaciones de monitoreo
 │   │       ├── cognitive_monitor.py# Seguimiento de activaciones/atención
-│   │       └── logger.py           # Logger JSON/timestamps
+│   │       ├── logger.py           # Logger JSON/timestamps
+│   │       └── visualizer_streamlit.py # Dashboard interactivo (Fase 19)
 │   ├── engine/
 │   │   ├── __init__.py
 │   │   ├── trainer.py              # Entrenamiento supervisado
@@ -69,6 +70,8 @@ neural_core/
 │   ├── hybrid_graph_autoalign_demo.py # AutoAlign dinámico (Fase 14)
 │   ├── global_training_demo.py     # Entrenamiento global con deep supervision (Fase 15)
 │   └── cognitive_attention_demo.py # Atención cognitiva dinámica (Fase 16)
+├── dashboard/
+│   └── app_dashboard.py            # App Streamlit del Cognitive Dashboard (Fase 19)
 ├── tests/
 │   ├── test_network.py
 │   ├── test_neuron.py
@@ -196,6 +199,33 @@ neural_core/
 - **GraphTrainer** registra cada episodio automáticamente durante el entrenamiento
 - **Fase de sueño** con `sleep_and_replay()` que reduce la pérdida promedio
 - **Demo `examples/memory_replay_demo.py`** muestra consolidación tras 300 épocas
+
+### ✅ Fase 19 - Cognitive Dashboard (Streamlit)
+- **CognitiveVisualizer** renderiza pérdidas, activaciones, atención y memoria en tiempo real
+- **App Streamlit** `dashboard/app_dashboard.py` consume el grafo activo vía `st.session_state`
+- **Integración opcional**: demos pueden lanzar el dashboard en segundo plano
+- **Dependencias añadidas**: `streamlit`, `pandas`, `plotly`, `altair`, `pydeck`
+- **Interfaz** multipestaña con métricas clave actualizadas durante entrenamiento y sleep cycles
+
+#### ▶️ Cómo lanzar el dashboard
+
+1. Inicia el proceso combinado desde la raíz del proyecto:
+   ```bash
+   PYTHONPATH=src uv run python launch_cognitive.py
+   ```
+   Este script ejecuta el entrenamiento (demo `memory_replay_demo.py`) y levanta Streamlit en `http://localhost:8501`, persistiendo los snapshots en `dashboard_state.json`.
+
+2. Abre el navegador en `http://localhost:8501` para visualizar las pestañas de **Pérdidas**, **Activaciones**, **Atención** y **Memoria episódica**. El dashboard consumirá datos en vivo si el entrenamiento sigue corriendo o mostrará el último snapshot disponible.
+
+También puedes ejecutar los pasos manualmente si prefieres procesos separados:
+```bash
+# Terminal 1 – entrenamiento
+PYTHONPATH=src uv run python examples/memory_replay_demo.py
+
+# Terminal 2 – dashboard
+PYTHONPATH=src uv run streamlit run dashboard/app_dashboard.py
+``` 
+Ambas variantes leen/escriben el snapshot compartido (`dashboard_state.json`), por lo que la visualización se mantiene incluso cuando el entrenamiento se detiene.
 
 ## 🧠 Estructura Completa del Proyecto
 
@@ -383,12 +413,11 @@ class NeuralNetwork:
 - **Funciones de activación extensibles**
 - **Tests automatizados**
 
-## 🚀 Próximos Pasos - Fase 19
+## 🚀 Próximos Pasos - Fase 20
 
-### 🧠 Cognitive Dashboard (Streamlit)
-- **Panel interactivo** para visualizar activaciones, atención y pérdidas en tiempo real
-- **Integración** con logs JSON del monitor cognitivo
-- **Comparativa** entre sesiones de entrenamiento y sleep cycles
+### 🧠 Memory Replay Dashboard Avanzado
+- **Controles interactivos** para filtrar episodios y ajustar replay_factor
+- **Comparativa de sesiones** con descargas CSV desde Streamlit
 
 ### 📈 Escalabilidad
 - **Batch processing** con NumPy para TRM y grafo cognitivo
@@ -419,4 +448,4 @@ Este proyecto sirve como:
 
 ---
 
-**Estado actual**: ✅ **Fase 18 Completada** - Memoria episódica y consolidación en producción
+
