@@ -207,6 +207,26 @@ neural_core/
 - **Dependencias añadidas**: `streamlit`, `pandas`, `plotly`, `altair`, `pydeck`
 - **Interfaz** multipestaña con métricas clave actualizadas durante entrenamiento y sleep cycles
 
+### ✅ Fase 20 - Meta-Learning Loop
+- **Paquete `core.meta`** con reglas adaptativas (`adaptive_lr`, `adaptive_focus`, `adaptive_sleep`) que observan pérdidas y atenciones del monitor
+- **MetaLearningController** ajusta dinámicamente learning rate, foco atencional e intervalo de consolidación usando el monitor y el MemoryReplaySystem
+- **Demo `examples/meta_learning_demo.py`** (`PYTHONPATH=src uv run python examples/meta_learning_demo.py`) muestra el bucle autorregulado en acción
+- **Tests `tests/test_meta_rules.py`** validan las heurísticas de ajuste
+- Detalles ampliados en `docs/fase20_meta_loop.md`
+
+### ✅ Fase 21 - Cognitive Evolution System (CES)
+- **Paquete `core.evolution`** con `CognitivePopulation`, utilidades de crossover y el `EvolutionManager` para coordinar generaciones
+- **Crossover híbrido** que mezcla pesos tipo Value/Tensor con mutaciones ligeras para mantener diversidad
+- **Evolución generacional**: selección de los grafos con mejor fitness, cruce y regeneración automática de la población
+- **Demo `examples/cognitive_evolution_demo.py`** (`PYTHONPATH=src uv run python examples/cognitive_evolution_demo.py`) ejecuta varias generaciones sobre XOR
+- Permite experimentar con evolución de arquitecturas sin alterar el flujo de entrenamiento base
+
+### ✅ Fase 22 - Cognitive Society System (CSS)
+- **Paquete `core.society`** con `CognitiveAgent`, `CommunicationChannel` y `SocietyManager` para coordinar agentes múltiples
+- **Intercambio social**: agentes comparten experiencias vía `exchange_memories` y broadcasts de mejores episodios
+- **Cooperación adaptativa**: cada agente entrena su propio grafo pero se beneficia de memorias ajenas
+- **Demo `examples/cognitive_society_demo.py`** (`PYTHONPATH=src uv run python examples/cognitive_society_demo.py`) muestra cómo convergen las pérdidas compartiendo conocimiento
+
 #### ▶️ Cómo lanzar el dashboard
 
 1. Inicia el proceso combinado desde la raíz del proyecto:
@@ -226,6 +246,9 @@ PYTHONPATH=src uv run python examples/memory_replay_demo.py
 PYTHONPATH=src uv run streamlit run dashboard/app_dashboard.py
 ``` 
 Ambas variantes leen/escriben el snapshot compartido (`dashboard_state.json`), por lo que la visualización se mantiene incluso cuando el entrenamiento se detiene.
+
+
+
 
 ## 🧠 Estructura Completa del Proyecto
 
