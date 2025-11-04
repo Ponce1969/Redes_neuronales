@@ -227,6 +227,20 @@ neural_core/
 - **Cooperación adaptativa**: cada agente entrena su propio grafo pero se beneficia de memorias ajenas
 - **Demo `examples/cognitive_society_demo.py`** (`PYTHONPATH=src uv run python examples/cognitive_society_demo.py`) muestra cómo convergen las pérdidas compartiendo conocimiento
 
+### ✅ Fase 23A - Cognitive API Server (CAS)
+- **Paquete `api/`** con servidor FastAPI, routers modulares y estado compartido (`CognitiveAppState`)
+- **Endpoints REST**: `/predict`, `/feedback`, `/evolve`, `/status` para interactuar con la sociedad en tiempo real
+- **Integración con `.env`**: API key y parámetros de despliegue para una configuración segura en la Orange Pi
+- **Script de arranque** (via `uvicorn src.api.server:app --host 0.0.0.0 --port 8000`), listo para exponerse tras un reverse proxy HTTPS
+- **Monitoreo en vivo**: `/status` reporta pérdidas recientes, memoria y espectro de agentes activos
+
+### ✅ Fase 23B - Cognitive Persistence Layer (CPL)
+- **Paquete `core.persistence`** con gestores de rutas, serialización de pesos/memorias y `PersistenceManager`
+- **Formato ligero**: pesos en `.npz` comprimido, memorias y métricas en `.json` human-readable
+- **Integración con API**: carga automática al iniciar servidor y endpoint `/save` para persistencia manual o vía cron
+- **Directorios `data/persistence/weights|memories`** almacenan hasta 100 episodios recientes por agente
+- Asegura continuidad del aprendizaje tras reinicios o despliegues en nodos distribuidos
+
 #### ▶️ Cómo lanzar el dashboard
 
 1. Inicia el proceso combinado desde la raíz del proyecto:

@@ -7,6 +7,7 @@ from typing import Dict, List
 
 from core.cognitive_block import CognitiveBlock
 from core.cognitive_graph_hybrid import CognitiveGraphHybrid
+from core.persistence import PersistenceManager
 from core.society.agent import CognitiveAgent
 from core.society.society_manager import SocietyManager
 from core.trm_act_block import TRM_ACT_Block
@@ -49,8 +50,15 @@ class CognitiveAppState:
             self.metadata.setdefault("loss_history", []).append(float(loss))
 
 
-app_state = CognitiveAppState(build_society())
+society = build_society()
+app_state = CognitiveAppState(society)
+persistence_manager = PersistenceManager(society)
+persistence_manager.load_all()
 
 
 def get_app_state() -> CognitiveAppState:
     return app_state
+
+
+def get_persistence_manager() -> PersistenceManager:
+    return persistence_manager

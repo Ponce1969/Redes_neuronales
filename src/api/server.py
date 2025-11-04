@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from api.routes import evolve, feedback, predict, status
+from api.routes import evolve, feedback, predict, save, status
 
 app = FastAPI(title="Cognitive API Server", version="0.1")
 
@@ -12,6 +12,7 @@ app.include_router(predict.router)
 app.include_router(feedback.router)
 app.include_router(evolve.router)
 app.include_router(status.router)
+app.include_router(save.router)
 
 
 @app.get("/")
