@@ -7,7 +7,9 @@ from typing import Dict, List
 
 from core.cognitive_block import CognitiveBlock
 from core.cognitive_graph_hybrid import CognitiveGraphHybrid
+from core.federation import FederatedClient
 from core.persistence import PersistenceManager
+from core.scheduler import CognitiveScheduler, SchedulerConfig
 from core.society.agent import CognitiveAgent
 from core.society.society_manager import SocietyManager
 from core.trm_act_block import TRM_ACT_Block
@@ -52,8 +54,28 @@ class CognitiveAppState:
 
 society = build_society()
 app_state = CognitiveAppState(society)
+
 persistence_manager = PersistenceManager(society)
 persistence_manager.load_all()
+
+try:
+    scheduler_config = SchedulerConfig()
+    federated_client = FederatedClient(
+        agent=None,
+        server_url="https://cloud.tudominio.com",
+        api_key="clave_cloud",
+    )
+except Exception:
+    scheduler_config = SchedulerConfig(enable_federation=False)
+    federated_client = None
+
+scheduler = CognitiveScheduler(
+    society=society,
+    config=scheduler_config,
+    persistence=persistence_manager,
+    federated_client=federated_client,
+)
+scheduler.start()
 
 
 def get_app_state() -> CognitiveAppState:
@@ -62,3 +84,7 @@ def get_app_state() -> CognitiveAppState:
 
 def get_persistence_manager() -> PersistenceManager:
     return persistence_manager
+
+
+def get_scheduler() -> CognitiveScheduler:
+    return scheduler

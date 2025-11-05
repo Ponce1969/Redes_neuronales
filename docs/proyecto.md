@@ -241,6 +241,27 @@ neural_core/
 - **Directorios `data/persistence/weights|memories`** almacenan hasta 100 episodios recientes por agente
 - Asegura continuidad del aprendizaje tras reinicios o despliegues en nodos distribuidos
 
+### ✅ Fase 23C - Cognitive Network (Distribución de Agentes)
+- **Paquete `core.distribution`** con `CognitiveDistributor` (cliente HTTP) y helpers de recepción
+- **Endpoint `/share`** en FastAPI para sincronizar memorias/pesos entre nodos protegidos por API key
+- **Serialización remota**: transferencias usan `.npz` base64 y memorias recientes en JSON (límite configurable)
+- **Tests `tests/test_distribution.py`** validan generación de payload y aplicación remota en entornos aislados
+- Permite interconectar Orange Pi, servidores cloud o PCs formando una red de sociedades cognitivas cooperativas
+
+### ✅ Fase 24 - Cognitive Federation (Aprendizaje Federado)
+- **Paquete `core.federation`** con utilidades de serialización/promedio y `FederatedClient`
+- **Router `/federate`** en FastAPI (servidor cloud) agrega pesos (`/upload`) y entrega promedio global (`/global`)
+- **Seguridad**: dependencia `require_api_key` y helper `get_api_headers` reutilizados por distribuidores y clientes
+- **Tests `tests/test_federation.py`** cubren serialización, promedio y roundtrip cliente-servidor (requiere FastAPI instalado)
+- Permite que nodos locales entrenen con sus datos y sincronicen pesos con un nodo federador sin exponer datos crudos
+
+### ✅ Fase 25 - Cognitive Scheduler (Ciclo Autónomo)
+- **Paquete `core.scheduler`** con `SchedulerConfig` (intervalos/flags) y `CognitiveScheduler` en hilo daemon
+- **Ciclos automatizados**: entrenamiento, persistencia, federación opcional, intercambio de memorias y sueño cognitivo
+- **Integrado en `api/dependencies.py`**: se instancia en el arranque, reutilizando `PersistenceManager` y `FederatedClient`
+- **Configuración flexible** (`loop_sleep`, banderas `enable_*`) permite desactivar federación/evolución en nodos aislados
+- Diseñado para mantener la sociedad aprendiendo sin intervención manual, alineado con despliegues Orange Pi + nube
+
 #### ▶️ Cómo lanzar el dashboard
 
 1. Inicia el proceso combinado desde la raíz del proyecto:
