@@ -125,6 +125,8 @@ class CognitiveGraphHybrid:
 
             outputs[name] = tensor_out
             self.monitor.track_activations(name, tensor_out.data)
+            block.last_activation = float(np.mean(tensor_out.data))  # type: ignore[attr-defined]
+            block.last_activation_vector = tensor_out.data.copy()  # type: ignore[attr-defined]
 
         return outputs
 
@@ -137,6 +139,10 @@ class CognitiveGraphHybrid:
                 block.z = Tensor(np.zeros_like(block.z.data))
             elif hasattr(block, "perceiver") and hasattr(block.perceiver, "reset"):
                 block.perceiver.reset()
+            if hasattr(block, "last_activation"):
+                block.last_activation = 0.0  # type: ignore[attr-defined]
+            if hasattr(block, "last_activation_vector"):
+                block.last_activation_vector = None  # type: ignore[attr-defined]
 
     def summary(self) -> None:
         print("=== CognitiveGraphHybrid Summary ===")

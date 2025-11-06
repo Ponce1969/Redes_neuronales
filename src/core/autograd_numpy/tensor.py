@@ -21,8 +21,14 @@ class Tensor:
     def __add__(self, other: Tensor | float) -> Tensor:
         return Tensor(self.data + (other.data if isinstance(other, Tensor) else other))
 
+    def __radd__(self, other: Tensor | float) -> Tensor:
+        return self.__add__(other)
+
     def __mul__(self, other: Tensor | float) -> Tensor:
         return Tensor(self.data * (other.data if isinstance(other, Tensor) else other))
+
+    def __rmul__(self, other: Tensor | float) -> Tensor:
+        return self.__mul__(other)
 
     def matmul(self, other: Tensor) -> Tensor:
         return Tensor(self.data @ other.data)

@@ -262,25 +262,64 @@ neural_core/
 - **Configuración flexible** (`loop_sleep`, banderas `enable_*`) permite desactivar federación/evolución en nodos aislados
 - Diseñado para mantener la sociedad aprendiendo sin intervención manual, alineado con despliegues Orange Pi + nube
 
-#### ▶️ Cómo lanzar el dashboard
+### ✅ Fase 26 - Latent Planner (Planificación Latente)
+- **Bloque `core.latent_planner_block.LatentPlannerBlock`** extiende `TRM_ACT_Block` con una etapa `plan()` que produce `z_plan`
+- **Opciones configurables**: `detach_each_step` para supervisión profunda y `retain_plan` para exponer el plan a memoria/monitoring
+- **Demo `examples/latent_planner_demo.py`** muestra inferencia y métricas del plan; **test `tests/test_latent_planner.py`** asegura estabilidad
+- **Integración sugerida**: usar `get_last_plan()` en dashboards, almacenar `z_plan` en replay y condicionarlo en módulos de atención/federación
 
-1. Inicia el proceso combinado desde la raíz del proyecto:
+### ✅ Fase 27 - PyG Bridge (Integración con PyTorch Geometric)
+- **Paquete `core.pyg_bridge`** con adaptador (`CognitiveGraphAdapter`), modelos GNN (`GCNReasoner`, `GATReasoner`) y `GraphTrainer`
+- **Adapter** convierte `CognitiveGraphHybrid` en `torch_geometric.data.Data` incluyendo activaciones y promedios de planes latentes
+- **Demo `examples/pyg_bridge_demo.py`** entrena un GCN sobre el grafo híbrido; **test `tests/test_pyg_bridge.py`** valida adaptación y trainer (con PyG instalado)
+- **Requisitos opcionales**: instalar `torch` y `torch_geometric` para habilitar visualización, razonamiento estructural y futuros dashboards (Fase 28)
+
+### ✅ Fase 28 - PyG Visualization Dashboard
+- **`dashboard/dashboard_pyg_viz.py`** crea una vista Streamlit que toma el grafo (vía `CognitiveGraphAdapter`) y lo visualiza con NetworkX + Matplotlib
+- **Colores por `z_plan`** y tabla con activación media, intensidad latente y salida del razonador `GCNReasoner`
+- **Listo para integración remota**: reemplazar el loader demo por un consumidor de `/api/graph/state` en Orange Pi/Cloud para visualizar nodos reales
+- **Dependencias añadidas**: `torch`, `torch-geometric` y `matplotlib` en `pyproject.toml`; `uv lock` actualizado
+
+### ✅ Fase 29 - Cognitive Graph Interactive Visualizer
+- **`dashboard/dashboard_pyg_interactive.py`** agrega un visualizador interactivo con Plotly para mover nodos y hacer zoom
+- **Razonador `GATReasoner`** calcula salidas por nodo; panel lateral muestra métricas (`z_plan`, salida GAT) y tabla resumen
+- **Interactividad**: hover con nombres, selección por `selectbox`, colores por intensidad latente, preparado para consumir WebSockets/REST en tiempo real
+- **Requisitos**: dependen de Fase 27/28 (PyTorch + PyG) más Plotly (ya presente) y NetworkX (incluido con PyG)
+
+#### ▶️ Cómo lanzar los dashboards
+
+**Dashboard principal (Fases 19-21)**
+
+1. Desde la raíz del proyecto:
    ```bash
    PYTHONPATH=src uv run python launch_cognitive.py
    ```
-   Este script ejecuta el entrenamiento (demo `memory_replay_demo.py`) y levanta Streamlit en `http://localhost:8501`, persistiendo los snapshots en `dashboard_state.json`.
+   Este script entrena la demo (`memory_replay_demo.py`) y levanta Streamlit en `http://localhost:8501`, persistiendo snapshots en `dashboard_state.json`.
 
-2. Abre el navegador en `http://localhost:8501` para visualizar las pestañas de **Pérdidas**, **Activaciones**, **Atención** y **Memoria episódica**. El dashboard consumirá datos en vivo si el entrenamiento sigue corriendo o mostrará el último snapshot disponible.
+2. Abrí `http://localhost:8501` para ver pestañas de **Pérdidas**, **Activaciones**, **Atención** y **Memoria episódica**. Si querés procesos separados:
+   ```bash
+   # Terminal 1 – entrenamiento
+   PYTHONPATH=src uv run python examples/memory_replay_demo.py
 
-También puedes ejecutar los pasos manualmente si prefieres procesos separados:
+   # Terminal 2 – dashboard
+   PYTHONPATH=src uv run streamlit run dashboard/app_dashboard.py
+   ```
+
+**Dashboard PyG Visualization (Fase 28)**
 ```bash
-# Terminal 1 – entrenamiento
-PYTHONPATH=src uv run python examples/memory_replay_demo.py
+PYTHONPATH=src uv run streamlit run dashboard/dashboard_pyg_viz.py
+```
+- Visualiza el grafo híbrido (nodos `sensor/planner/decision`), coloreado por intensidad `z_plan`.
+- Tabla con activación media, plan latente y salida del `GCNReasoner`.
+- Para conectar con nodos remotos, reemplaza el loader demo por un request a `/api/graph/state`.
 
-# Terminal 2 – dashboard
-PYTHONPATH=src uv run streamlit run dashboard/app_dashboard.py
-``` 
-Ambas variantes leen/escriben el snapshot compartido (`dashboard_state.json`), por lo que la visualización se mantiene incluso cuando el entrenamiento se detiene.
+**Dashboard PyG Interactive (Fase 29)**
+
+```bash
+PYTHONPATH=src uv run streamlit run dashboard/dashboard_pyg_interactive.py
+```
+- Permite mover nodos, hacer zoom y ver métricas al seleccionar cada bloque.
+- Usa Plotly y `GATReasoner` para representar salidas; listo para extender con WebSockets en tiempo real.
 
 
 
