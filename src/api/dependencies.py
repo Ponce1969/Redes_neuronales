@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import threading
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from core.cognitive_block import CognitiveBlock
 from core.cognitive_graph_hybrid import CognitiveGraphHybrid
 from core.federation import FederatedClient
 from core.persistence import PersistenceManager
+from core.reasoning import ReasonerManager
 from core.scheduler import CognitiveScheduler, SchedulerConfig
 from core.society.agent import CognitiveAgent
 from core.society.society_manager import SocietyManager
@@ -41,6 +42,9 @@ class CognitiveAppState:
         self.predict_calls = 0
         self.feedback_calls = 0
         self.metadata: Dict[str, List[float]] = {"loss_history": []}
+        
+        # ReasonerManager para control selectivo de bloques
+        self.reasoner_manager: Optional[ReasonerManager] = None
 
     def record_predict(self) -> None:
         with self.lock:
@@ -55,7 +59,28 @@ class CognitiveAppState:
 society = build_society()
 app_state = CognitiveAppState(society)
 
-persistence_manager = PersistenceManager(society)
+# Inicializar ReasonerManager con dimensiones del grafo
+try:
+    sample_graph = society.agents[0].graph
+    n_blocks = len(sample_graph.blocks)
+    
+    # Estimar n_inputs: usar dimensión conservadora para concatenación de z_plan
+    max_plan_dim = 8  # Típico para LatentPlannerBlock/TRM
+    n_inputs = max_plan_dim * n_blocks
+    n_hidden = n_inputs * 2  # Regla empírica: 2x input_dim
+    
+    app_state.reasoner_manager = ReasonerManager(
+        n_inputs=n_inputs,
+        n_hidden=n_hidden,
+        n_blocks=n_blocks,
+        seed=42
+    )
+    print(f"[ReasonerManager] Inicializado: {n_blocks} bloques, {n_inputs} inputs, {n_hidden} hidden")
+except Exception as e:
+    print(f"[ReasonerManager] No inicializado: {e}")
+    app_state.reasoner_manager = None
+
+persistence_manager = PersistenceManager(society, app_state.reasoner_manager)
 persistence_manager.load_all()
 
 try:

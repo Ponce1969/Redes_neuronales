@@ -284,42 +284,340 @@ neural_core/
 - **`dashboard/dashboard_pyg_interactive.py`** agrega un visualizador interactivo con Plotly para mover nodos y hacer zoom
 - **Razonador `GATReasoner`** calcula salidas por nodo; panel lateral muestra métricas (`z_plan`, salida GAT) y tabla resumen
 - **Interactividad**: hover con nombres, selección por `selectbox`, colores por intensidad latente, preparado para consumir WebSockets/REST en tiempo real
-- **Requisitos**: dependen de Fase 27/28 (PyTorch + PyG) más Plotly (ya presente) y NetworkX (incluido con PyG)
+- **Requisitos**: dependen de Fase 27/28 (PyTorch + PyG) más Plotly (ya presente) y NetworkX (incluido con PyG)
+
+### ✅ Fase 30 - Live Cognitive Stream
+- **Backend**: WebSocket `/ws/graph_state` (FastAPI) publica el grafo cognitivo serializado cada 2 s usando `CognitiveGraphAdapter`
+- **Frontend**: `dashboard/dashboard_live_stream.py` escucha con `websocket-client`, actualiza un gráfico Plotly y tabla Streamlit en tiempo real
+- **Integración**: reusa `get_app_state()` para acceder al grafo activo; listo para conectar nodos Orange Pi/Cloud mediante túnel seguro
+- **Dependencias**: agrega `websocket-client` a `pyproject.toml`; `uv lock` actualizado
+
+### ✅ Fase 31-B - Cognitive Reasoning Layer
+- **Paquete `core.reasoning`** con `Reasoner` (MLP ligero en NumPy) que decide gates de activación por bloque
+- **Método `forward_with_reasoner`** en `CognitiveGraphHybrid` ejecuta el grafo selectivamente según decisiones del Reasoner
+- **Modos de gating**: softmax (distribución continua), top-k (sparse), threshold (umbral adaptativo)
+- **Entrenamiento evolutivo**: `evolve_reasoner_on_task()` optimiza el Reasoner sin gradientes mediante mutación y selección
+- **Utilidades**: `evaluate_reasoner()`, `extract_gates_history()` para análisis y visualización de decisiones
+- **Demos**: `examples/cognitive_reasoning_demo.py` (inferencia básica) y `examples/cognitive_reasoning_evolution_demo.py` (entrenamiento en XOR)
+- **Integración**: compatible con LatentPlannerBlock, TRM_ACT_Block y atención cognitiva; gates guardados en `graph.last_gates` para dashboards
+- **Persistencia**: `reasoner.state_dict()` y `load_state_dict()` para guardar/cargar pesos optimizados
+
+### ✅ Fase 32 - Reasoner Integration & Dashboard
+- **ReasonerManager** centraliza gestión del Reasoner con thread-safety, evolución async y persistencia .npz
+- **API REST completa** (`/reasoner/*`): status, gates, predict, evolve, save, load, reset con FastAPI
+- **Integración con CognitiveAppState**: ReasonerManager inicializado automáticamente al arrancar servidor
+- **PersistenceManager extendido**: guarda/carga Reasoner junto con pesos del grafo automáticamente
+- **Dashboard de control** (`dashboard_reasoner_panel.py`): panel Streamlit para monitoreo y control del Reasoner
+- **Dashboard PyG con Reasoner** (`dashboard_pyg_with_reasoner.py`): visualización integrada de grafo + gates en tiempo real
+- **Evolución con evaluación real**: endpoint `/evolve` usa el grafo activo para fitness (no placeholders)
+- **Auto-persistencia**: Reasoner se guarda/carga automáticamente en `data/persistence/reasoner_state.npz`
+
+### ✅ Fase 33 - Curriculum Learning System
+- **Sistema de aprendizaje progresivo**: el Reasoner aprende de tareas simples a complejas (identity → xor → parity → reasoning)
+- **7 tareas pre-configuradas**: identity, xor, parity, counting, sequence, memory, reasoning con dificultad creciente
+- **Métricas cognitivas avanzadas**: MSE, MAE, accuracy, gate diversity, gate entropy, convergence rate, stability (8 métricas)
+- **CurriculumManager profesional**: sin variables globales, inyección de dependencias, thread-safe con RLock
+- **Checkpointing automático**: guarda estado después de cada etapa, resume desde última completada
+- **API REST completa** (`/curriculum/*`): start, status, pause, resume, reset, history, checkpoints, export
+- **Dashboard Curriculum** (`dashboard_curriculum.py`): visualización en tiempo real de progreso, historial y métricas
+- **Early stopping inteligente**: success_threshold y fail_threshold por etapa, evolución ligera adaptativa
+- **Tests exhaustivos**: 20+ tests unitarios y de integración en `tests/test_curriculum.py`
+- **Documentación completa**: `docs/fase33_curriculum_learning.md` con ejemplos, API, guías y troubleshooting
 
 #### ▶️ Cómo lanzar los dashboards
 
-**Dashboard principal (Fases 19-21)**
+> **⚠️ Nota importante**: Todos los comandos deben ejecutarse desde la raíz del proyecto: `/home/gonzapython/Documentos/Redes_Neuronales/neural_core`
 
-1. Desde la raíz del proyecto:
-   ```bash
-   PYTHONPATH=src uv run python launch_cognitive.py
-   ```
-   Este script entrena la demo (`memory_replay_demo.py`) y levanta Streamlit en `http://localhost:8501`, persistiendo snapshots en `dashboard_state.json`.
+---
 
-2. Abrí `http://localhost:8501` para ver pestañas de **Pérdidas**, **Activaciones**, **Atención** y **Memoria episódica**. Si querés procesos separados:
-   ```bash
-   # Terminal 1 – entrenamiento
-   PYTHONPATH=src uv run python examples/memory_replay_demo.py
+### 🎯 **Setup Completo (Recomendado para Fase 32)**
 
-   # Terminal 2 – dashboard
-   PYTHONPATH=src uv run streamlit run dashboard/app_dashboard.py
-   ```
+Para visualizar el Reasoner en acción, ejecuta estos 3 comandos en terminales separadas:
 
-**Dashboard PyG Visualization (Fase 28)**
+```bash
+# Terminal 1: Servidor FastAPI con Reasoner integrado
+PYTHONPATH=src uv run uvicorn api.server:app --reload
+# Accede: http://localhost:8000 (API REST)
+
+# Terminal 2: Panel de control del Reasoner
+PYTHONPATH=src uv run streamlit run dashboard/dashboard_reasoner_panel.py
+# Accede: http://localhost:8501 (Control de evolución, métricas, save/load)
+
+# Terminal 3: Visualización del grafo con gates
+PYTHONPATH=src uv run streamlit run dashboard/dashboard_pyg_with_reasoner.py
+# Accede: http://localhost:8502 (Grafo interactivo con gates en tiempo real)
+```
+
+**Características del setup completo**:
+- 🎮 Control total del Reasoner (evolución, persistencia)
+- 📊 Métricas en tiempo real (loss, generación, gates)
+- 🎨 Visualización de grafo cognitivo con nodos coloreados por gates
+- 🔄 Auto-refresh configurable (1-10 segundos)
+
+---
+
+### 📋 **Dashboards Disponibles por Fase**
+
+#### 1️⃣ **Dashboard Principal - Monitor Cognitivo** (Fases 19-21)
+
+**Opción A: Script integrado**
+```bash
+PYTHONPATH=src uv run python launch_cognitive.py
+```
+- Entrena automáticamente y levanta dashboard en http://localhost:8501
+- Persiste snapshots en `dashboard_state.json`
+
+**Opción B: Procesos separados**
+```bash
+# Terminal 1: Entrenamiento
+PYTHONPATH=src uv run python examples/memory_replay_demo.py
+
+# Terminal 2: Dashboard
+PYTHONPATH=src uv run streamlit run dashboard/app_dashboard.py
+```
+
+**Características**:
+- 📉 Pérdidas de entrenamiento
+- 🧠 Activaciones por bloque
+- 👁️ Atención cognitiva
+- 💾 Memoria episódica
+
+---
+
+#### 2️⃣ **Dashboard PyG Visualization** (Fase 28)
+
 ```bash
 PYTHONPATH=src uv run streamlit run dashboard/dashboard_pyg_viz.py
 ```
-- Visualiza el grafo híbrido (nodos `sensor/planner/decision`), coloreado por intensidad `z_plan`.
-- Tabla con activación media, plan latente y salida del `GCNReasoner`.
-- Para conectar con nodos remotos, reemplaza el loader demo por un request a `/api/graph/state`.
+**Accede**: http://localhost:8501
 
-**Dashboard PyG Interactive (Fase 29)**
+**Características**:
+- 🎨 Grafo híbrido coloreado por intensidad `z_plan`
+- 📊 Tabla con activación media, plan latente, salida GCNReasoner
+- 🔗 Preparado para conectar con nodos remotos via API
+
+---
+
+#### 3️⃣ **Dashboard PyG Interactive** (Fase 29)
 
 ```bash
 PYTHONPATH=src uv run streamlit run dashboard/dashboard_pyg_interactive.py
 ```
-- Permite mover nodos, hacer zoom y ver métricas al seleccionar cada bloque.
-- Usa Plotly y `GATReasoner` para representar salidas; listo para extender con WebSockets en tiempo real.
+**Accede**: http://localhost:8501
+
+**Características**:
+- 🖱️ Nodos movibles (drag & drop)
+- 🔍 Zoom interactivo
+- 📊 Métricas al seleccionar bloques
+- 🧠 GATReasoner para representar salidas
+
+---
+
+#### 4️⃣ **Live Cognitive Stream** (Fase 30)
+
+```bash
+# Terminal 1: Backend WebSocket
+PYTHONPATH=src uv run uvicorn api.server:app --reload
+
+# Terminal 2: Dashboard streaming
+PYTHONPATH=src uv run streamlit run dashboard/dashboard_live_stream.py
+```
+**Accede**: 
+- Backend: http://localhost:8000
+- Dashboard: http://localhost:8501
+
+**Características**:
+- 🔄 Conexión WebSocket a `ws://localhost:8000/ws/graph_state`
+- ⏱️ Actualizaciones cada 2 segundos
+- 🌐 Configurable para nodos remotos o túnel Cloudflare
+
+---
+
+#### 5️⃣ **Reasoner Control Panel** (Fase 32) ⭐ NUEVO
+
+```bash
+# Requiere servidor corriendo (ver Terminal 1 del setup completo)
+PYTHONPATH=src uv run streamlit run dashboard/dashboard_reasoner_panel.py
+```
+**Accede**: http://localhost:8501
+
+**Características**:
+- 🎮 **Control de evolución**: Iniciar/detener con parámetros configurables
+- 📊 **Métricas en tiempo real**: Best loss, generación, progreso
+- 📈 **Gráfico de barras**: Gates actuales por bloque
+- 📋 **Historial**: Últimos 5 steps de gates aplicados
+- 💾 **Persistencia**: Save/Load con un click
+- ⚙️ **Auto-refresh**: Actualización cada 1-10 segundos
+
+**Controles disponibles**:
+- Slider de generaciones (10-200)
+- Slider de población (4-20)
+- Slider de mutación (0.01-0.1)
+- Botones: Evolve, Stop, Save, Load
+
+---
+
+#### 6️⃣ **Dashboard PyG + Reasoner** (Fase 32) ⭐
+
+```bash
+# Requiere servidor corriendo
+PYTHONPATH=src uv run streamlit run dashboard/dashboard_pyg_with_reasoner.py
+```
+**Accede**: http://localhost:8502
+
+**Características**:
+- 🎨 **Grafo interactivo Plotly**: Nodos movibles, zoom, hover con detalles
+- 🌈 **Coloreo dual**: Por plan latente O por gates del Reasoner
+- 📊 **Métricas por bloque**: Activación, plan, GAT output, gate
+- 📋 **Tabla detallada**: Todas las features en formato tabular
+- 🔄 **Auto-refresh**: Sincronizado con evolución del Reasoner
+- 👁️ **Estado del Reasoner**: Visible en sidebar (running/listo, best loss)
+
+**Interactividad**:
+- Selector: "Colorear nodos por" → plan / gates
+- Checkbox: Auto-refresh activado/desactivado
+- Slider: Intervalo de actualización (1-10s)
+
+---
+
+#### 7️⃣ **Dashboard Curriculum Learning** (Fase 33) ⭐ NUEVO
+
+```bash
+# Requiere servidor corriendo
+PYTHONPATH=src uv run streamlit run dashboard/dashboard_curriculum.py
+```
+**Accede**: http://localhost:8503
+
+**Características**:
+- 📊 **Estado general**: Progress bar, etapa actual, completadas
+- 📈 **Evolución del loss**: Gráfico interactivo por etapa
+- 📊 **Epochs por etapa**: Bar chart con coloreo por dificultad
+- 📋 **Tabla detallada**: Status, loss, accuracy, gate diversity por etapa
+- 📉 **Estadísticas globales**: Total epochs, avg loss, avg accuracy, completion rate
+- 📚 **Lista de etapas**: Visualización de todas las etapas (completadas/actuales/pendientes)
+- 🎮 **Controles**: Start, Pause, Reset del curriculum
+- ⚙️ **Auto-refresh**: Actualización automática cada 1-10 segundos
+- 📋 **Presets**: Estándar (7 etapas), Rápido (4 etapas), Avanzado (10 etapas), Personalizado
+
+**Flujo de trabajo**:
+1. Servidor corriendo en terminal 1
+2. Dashboard abierto en terminal 2
+3. Click en "▶️ Start" para iniciar curriculum
+4. Observar progreso en tiempo real
+5. El Reasoner aprende progresivamente de simple a complejo
+
+---
+
+### 🚀 **Flujo de Trabajo Recomendado**
+
+#### Para Fase 33 (Curriculum Learning): ⭐ RECOMENDADO
+
+1. **Arrancar servidor** (Terminal 1):
+   ```bash
+   PYTHONPATH=src uv run uvicorn api.server:app --reload
+   ```
+   Espera ver: `[ReasonerManager] Inicializado...`
+
+2. **Abrir dashboard curriculum** (Terminal 2):
+   ```bash
+   PYTHONPATH=src uv run streamlit run dashboard/dashboard_curriculum.py
+   ```
+   - Click en **▶️ Start** para iniciar curriculum estándar (7 etapas)
+   - Observa progreso en tiempo real con gráficos y métricas
+   - El Reasoner aprende progresivamente: identity → xor → parity → ...
+
+3. **Opcional: Dashboard PyG** (Terminal 3):
+   ```bash
+   PYTHONPATH=src uv run streamlit run dashboard/dashboard_pyg_with_reasoner.py
+   ```
+   - Ver cómo el grafo cambia mientras aprende
+   - Observar gates actualizándose en tiempo real
+
+4. **Al finalizar**:
+   - El Reasoner entrenado se guarda automáticamente
+   - Checkpoint disponible en `data/curriculum/curriculum_state.json`
+   - Historial accesible via API: `curl http://localhost:8000/curriculum/history | jq`
+
+---
+
+#### Para Fase 32 (Reasoner + Visualización):
+
+1. **Arrancar servidor** (Terminal 1):
+   ```bash
+   PYTHONPATH=src uv run uvicorn api.server:app --reload
+   ```
+   Espera ver: `[ReasonerManager] Inicializado: X bloques...`
+
+2. **Abrir panel de control** (Terminal 2):
+   ```bash
+   PYTHONPATH=src uv run streamlit run dashboard/dashboard_reasoner_panel.py
+   ```
+   - Ajusta parámetros con sliders
+   - Click en **▶️ Evolve**
+   - Observa métricas actualizándose
+
+3. **Abrir visualización PyG** (Terminal 3):
+   ```bash
+   PYTHONPATH=src uv run streamlit run dashboard/dashboard_pyg_with_reasoner.py
+   ```
+   - Selecciona "gates" en el selector
+   - Observa nodos cambiar de color mientras evoluciona
+   - Ve la tabla con todas las features
+
+4. **Guardar progreso**:
+   - En el panel de control, click **💾 Save**
+   - El Reasoner se guarda en `data/persistence/reasoner_state.npz`
+
+---
+
+### 📡 **API REST Endpoints** (Fase 32)
+
+Con el servidor corriendo, puedes usar estos endpoints:
+
+```bash
+# Estado del Reasoner
+curl http://localhost:8000/reasoner/status | jq
+
+# Gates recientes
+curl http://localhost:8000/reasoner/gates?n=10 | jq
+
+# Iniciar evolución (50 generaciones)
+curl -X POST http://localhost:8000/reasoner/evolve \
+  -H "Content-Type: application/json" \
+  -d '{"generations": 50, "pop_size": 10, "mutation_scale": 0.03}'
+
+# Detener evolución
+curl -X POST http://localhost:8000/reasoner/evolve/stop
+
+# Guardar estado
+curl -X POST http://localhost:8000/reasoner/save
+
+# Cargar estado
+curl -X POST http://localhost:8000/reasoner/load
+```
+
+---
+
+### 🐛 **Troubleshooting**
+
+**Error: "Address already in use"**
+```bash
+# Matar proceso en puerto 8000
+kill -9 $(lsof -ti:8000)
+```
+
+**Error: "ModuleNotFoundError: torch"**
+```bash
+uv pip install torch torch-geometric
+```
+
+**Dashboard no conecta a API**
+- Verifica que el servidor esté corriendo: `curl http://localhost:8000/reasoner/status`
+- Reinicia el servidor si es necesario
+
+**Streamlit muestra error de "Duplicate Element"**
+- Presiona **R** para recargar el dashboard
+- O reinicia con Ctrl+C y vuelve a ejecutar el comando
 
 
 
