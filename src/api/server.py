@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 
 from api.routes import (
+    benchmark,
     curriculum,
     evolve,
     feedback,
@@ -29,6 +30,7 @@ app.include_router(federated_router)
 app.include_router(websocket_graph.router)
 app.include_router(reasoner.router)
 app.include_router(curriculum.router)
+app.include_router(benchmark.router)
 
 
 @app.get("/")

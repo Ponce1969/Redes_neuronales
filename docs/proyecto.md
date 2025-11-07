@@ -324,6 +324,22 @@ neural_core/
 - **Tests exhaustivos**: 20+ tests unitarios y de integración en `tests/test_curriculum.py`
 - **Documentación completa**: `docs/fase33_curriculum_learning.md` con ejemplos, API, guías y troubleshooting
 
+### ✅ Fase 34 - Cognitive Benchmark Suite
+- **Sistema de benchmarking científico**: comparación de configuraciones con reproducibilidad total y análisis estadístico riguroso
+- **BenchmarkConfig con hashing único**: seed control, versionado, validación, serialización JSON/YAML para reproducibilidad
+- **15+ métricas científicas**: performance, convergencia, estabilidad, gates, eficiencia, generalización con aggregation multi-run
+- **Provenance completo**: captura automática de Python version, NumPy version, OS, git commit/branch/dirty, random state serializado
+- **8 estrategias baseline**: random_uniform, random_softmax, equal, binary_random, topk_random, first_k, last_k, gaussian
+- **Comparador estadístico**: t-tests, confidence intervals (95%), Cohen's d effect size, Bonferroni correction, Friedman test
+- **Multi-run aggregation**: N runs (default 5) con mean, std, CI, min, max, median por métrica para validez estadística
+- **ReportGenerator multi-formato**: Markdown, HTML, LaTeX (papers), CSV (Excel/Pandas), JSON (programático)
+- **7 configs pre-definidas**: baseline_random, curriculum_softmax, curriculum_topk, no_curriculum_topk, curriculum_fast, high_mutation, large_reasoner
+- **API REST completa** (`/benchmark/*`): configs, run, compare, status, results, reports con background execution
+- **Dashboard Benchmark** (`dashboard_benchmark.py`): 3 modos (Ver/Ejecutar/Comparar), gráficos Plotly, auto-refresh
+- **Tests exhaustivos**: 30+ tests (config, metrics, provenance, baselines, comparator, integración) en `tests/test_benchmark.py`
+- **Demos científicos**: `benchmark_demo.py` (básico), `benchmark_scientific.py` (reproducibilidad + stats + reportes)
+- **Documentación completa**: `docs/fase34_benchmark_suite.md` con casos de uso, mejores prácticas, comparación Fase 33 vs 34
+
 #### ▶️ Cómo lanzar los dashboards
 
 > **⚠️ Nota importante**: Todos los comandos deben ejecutarse desde la raíz del proyecto: `/home/gonzapython/Documentos/Redes_Neuronales/neural_core`
@@ -508,6 +524,35 @@ PYTHONPATH=src uv run streamlit run dashboard/dashboard_curriculum.py
 
 ---
 
+#### 8️⃣ **Dashboard Benchmark Suite** (Fase 34) ⭐ NUEVO
+
+```bash
+# Requiere servidor corriendo
+PYTHONPATH=src uv run streamlit run dashboard/dashboard_benchmark.py
+```
+**Accede**: http://localhost:8504
+
+**Características**:
+- 📊 **3 Modos de operación**: Ver Resultados, Ejecutar Benchmark, Comparar Configs
+- 🧮 **Ver Resultados**: Tabla interactiva de todos los benchmarks, gráfico comparativo, detalles completos
+- 🚀 **Ejecutar Benchmark**: Selector de configs pre-definidas, preview de parámetros, ejecución con un click
+- ⚖️ **Comparar Configs**: Selección múltiple, elección de métrica, reportes automáticos multi-formato
+- 📈 **Gráficos Plotly**: Bar charts de comparación, distribuciones, evolución temporal
+- 📋 **Configs disponibles**: 7 pre-definidas (baseline_random, curriculum_softmax, curriculum_topk, etc.)
+- 📊 **Métricas**: 15+ métricas científicas (loss, accuracy, convergencia, estabilidad, gates, eficiencia)
+- 🔄 **Auto-refresh**: Actualización en tiempo real durante ejecución
+- 💾 **Gestión de resultados**: Lista completa, filtros, export, clear
+
+**Flujo de trabajo científico**:
+1. Servidor corriendo en terminal 1
+2. Dashboard benchmark abierto en terminal 2
+3. Modo "Ejecutar Benchmark" → Seleccionar config → Click "▶️ Ejecutar"
+4. O Modo "Comparar Configs" → Seleccionar 2+ configs → Click "▶️ Ejecutar Comparación"
+5. Ver resultados en tiempo real con stats (mean, std, CI, p-values)
+6. Reportes automáticos en `data/benchmarks/reports/` (MD, HTML, LaTeX, CSV, JSON)
+
+---
+
 ### 🚀 **Flujo de Trabajo Recomendado**
 
 #### Para Fase 33 (Curriculum Learning): ⭐ RECOMENDADO
@@ -537,6 +582,64 @@ PYTHONPATH=src uv run streamlit run dashboard/dashboard_curriculum.py
    - El Reasoner entrenado se guarda automáticamente
    - Checkpoint disponible en `data/curriculum/curriculum_state.json`
    - Historial accesible via API: `curl http://localhost:8000/curriculum/history | jq`
+
+---
+
+#### Para Fase 34 (Benchmark Suite): ⭐ NUEVO - VALIDACIÓN CIENTÍFICA
+
+1. **Arrancar servidor** (Terminal 1):
+   ```bash
+   PYTHONPATH=src uv run uvicorn api.server:app --reload
+   ```
+   Espera ver: `[ReasonerManager] Inicializado...`
+
+2. **Opción A - Dashboard Benchmark** (Terminal 2):
+   ```bash
+   PYTHONPATH=src uv run streamlit run dashboard/dashboard_benchmark.py
+   ```
+   - Modo "Ejecutar Benchmark" → Seleccionar config (ej: `curriculum_fast`)
+   - Click **▶️ Ejecutar Benchmark** 
+   - Ver resultados con N=5 runs, mean ± std, confidence intervals
+   
+   O bien:
+   
+   - Modo "Comparar Configs" → Seleccionar 2+ configs
+   - Click **▶️ Ejecutar Comparación**
+   - Obtener análisis estadístico (t-tests, p-values, effect size)
+   - Reportes automáticos en `data/benchmarks/reports/`
+
+3. **Opción B - Demo Científico** (sin servidor):
+   ```bash
+   PYTHONPATH=src python examples/benchmark_scientific.py
+   ```
+   - Demuestra reproducibilidad completa
+   - Ejecuta comparación estadística
+   - Genera reportes multi-formato (MD, HTML, LaTeX, CSV, JSON)
+
+4. **Opción C - API Direct**:
+   ```bash
+   # Ejecutar benchmark
+   curl -X POST http://localhost:8000/benchmark/run \
+     -H "Content-Type: application/json" \
+     -d '{"config_name": "curriculum_softmax", "save_results": true}'
+   
+   # Ver resultados
+   curl http://localhost:8000/benchmark/results | jq
+   
+   # Ejecutar comparación
+   curl -X POST http://localhost:8000/benchmark/compare \
+     -H "Content-Type: application/json" \
+     -d '{
+       "config_names": ["curriculum_softmax", "baseline_random"],
+       "metric": "final_loss"
+     }'
+   ```
+
+5. **Al finalizar**:
+   - Resultados en `data/benchmarks/results/*.json`
+   - Reportes en `data/benchmarks/reports/*/` (5 formatos)
+   - Provenance completo para reproducibilidad
+   - Análisis estadístico con rigor científico
 
 ---
 
