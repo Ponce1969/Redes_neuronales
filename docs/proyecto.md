@@ -340,9 +340,41 @@ neural_core/
 - **Demos científicos**: `benchmark_demo.py` (básico), `benchmark_scientific.py` (reproducibilidad + stats + reportes)
 - **Documentación completa**: `docs/fase34_benchmark_suite.md` con casos de uso, mejores prácticas, comparación Fase 33 vs 34
 
+### ✅ Fase 35 - Agentic Reasoners (MVP Día 1) ⭐ NUEVO
+- **Sistema agentivo completo**: loop Plan-Act-Reflect inspirado en Claude Agent SDK y ReAct para razonamiento autónomo
+- **5 agentes especializados**: ContextAgent (recopila info), PlannerAgent (genera planes), ActionAgent (ejecuta), VerifierAgent (verifica), ReflectorAgent (aprende)
+- **Loop cognitivo**: Context → Plan → Act → Verify → Reflect con early stopping inteligente cuando cumple objetivo
+- **Tool system extensible**: 5 tools (reasoner_evolve, graph_analyze, curriculum_start, benchmark_quick, system_health_check)
+- **4 estrategias de planificación**: optimize_performance, explore, learn, diagnose con priorización dinámica de acciones
+- **Scoring fuzzy multi-criterio**: performance (40%), stability (30%), efficiency (20%), novelty (10%) con decisiones accept/retry/abort
+- **Memory system**: memoria episódica (historial ciclos) + semántica (conocimiento acumulado) con persistencia JSON
+- **Telemetría completa**: call_count, success_rate, avg_time por agente, tool y orchestrator con AgentRegistry global
+- **Integración total**: usa Reasoner (Fase 31-32), Curriculum (Fase 33), Benchmark (Fase 34) de forma autónoma
+- **LLM-ready**: VerifierAgent preparado para LLM-as-Judge (Gemini/DeepSeek - Día 2 pending)
+- **Demo funcional**: `agentic_demo.py` ejecuta loop completo con stats detalladas
+- **Arquitectura inspirada en**: Claude Agent SDK + ReAct paper + Neuraxon (LLM-as-Judge)
+- **Documentación**: `docs/fase35_agentic_reasoners.md` con arquitectura, componentes, casos de uso, roadmap Día 2
+
 #### ▶️ Cómo lanzar los dashboards
 
 > **⚠️ Nota importante**: Todos los comandos deben ejecutarse desde la raíz del proyecto: `/home/gonzapython/Documentos/Redes_Neuronales/neural_core`
+
+### 🎯 **Dashboard Hub - Centro de Control Unificado** ⭐ NUEVO
+
+Para ver **todos los dashboards integrados en una sola aplicación**:
+
+```bash
+PYTHONPATH=src streamlit run dashboard/dashboard_hub.py
+```
+
+**Features del Hub**:
+- ✅ 6 pestañas integradas (Agentic, Benchmark, Curriculum, Reasoner, Live, PyG)
+- ✅ Vista unificada de todo el sistema
+- ✅ Estado del API server en tiempo real
+- ✅ Enlaces rápidos a dashboards individuales
+- ✅ Guía rápida integrada
+
+**O ejecutar dashboards individuales** (ver secciones abajo):
 
 ---
 
@@ -640,6 +672,44 @@ PYTHONPATH=src uv run streamlit run dashboard/dashboard_benchmark.py
    - Reportes en `data/benchmarks/reports/*/` (5 formatos)
    - Provenance completo para reproducibilidad
    - Análisis estadístico con rigor científico
+
+---
+
+#### Para Fase 35 (Agentic Reasoners): ⭐ NUEVO - RAZONAMIENTO AUTÓNOMO
+
+1. **Demo Standalone** (sin servidor):
+   ```bash
+   PYTHONPATH=src python examples/agentic_demo.py
+   ```
+   - Ejecuta loop Plan-Act-Reflect completo
+   - Muestra ciclos en tiempo real
+   - Estadísticas de agentes y tools
+   - Historial completo de decisiones
+
+2. **Opción Avanzada** (con servidor):
+   ```bash
+   # Terminal 1: Servidor
+   PYTHONPATH=src uv run uvicorn api.server:app --reload
+   
+   # Terminal 2: Ejecutar loop vía API (Día 2)
+   curl -X POST http://localhost:8000/agents/run-loop \
+     -d '{"max_iterations": 3, "goal": "optimize_performance"}'
+   ```
+
+3. **Al finalizar**:
+   - El Reasoner habrá:
+     - Analizado el sistema automáticamente
+     - Generado y ejecutado plan de acciones
+     - Verificado resultados con scoring fuzzy
+     - Reflexionado y aprendido de la experiencia
+   - Memoria guardada en `data/agents/memory/memory.json`
+   - Logs detallados del loop cognitivo
+
+**Goals disponibles**:
+- `optimize_performance`: Mejora el reasoner automáticamente
+- `explore`: Prueba diferentes configuraciones
+- `learn`: Inicia curriculum learning
+- `diagnose`: Diagnostica problemas del sistema
 
 ---
 
